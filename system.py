@@ -12,6 +12,8 @@ def header(titulo, largura=80, **kwargs):
     de caixa Unicode (estilo double-line) e códigos de escape ANSI para criar
     uma separação visual sofisticada e profissional em terminais.
 
+    (  "Meu título", var1=valor1, var2=valor2 ... )
+
     Parâmetros
     ----------
     titulo : str
@@ -65,6 +67,8 @@ def status(msg):
     início de novas etapas no script. Ela utiliza um marcador colorido e
     espaçamento estratégico para manter a organização sem poluir o terminal.
 
+    (  "Minha Mensagem"  )
+
     Parâmetros
     ----------
     msg : str
@@ -90,6 +94,8 @@ def param(*items, indent=6):
     os nomes, os separadores de igualdade e as unidades físicas fiquem
     perfeitamente alinhados, facilitando a leitura de dados técnicos e
     relatórios científicos no terminal.
+
+    (  ("Meu valor é", valor1, "unidade1") , ("Meu valor é", valor2, "unidade2")... )
 
     Parâmetros
     ----------
@@ -170,6 +176,8 @@ def table(dados):
     Esta função transforma dados estruturados em uma representação visual
     organizada, calculando dinamicamente a largura das colunas para garantir
     o alinhamento perfeito de cabeçalhos e valores no terminal.
+
+    (    [{"COLUNA 1": "val1", "COLUNA 2": "val2"}, {"COLUNA 1": "val3", "COLUNA 2": "val4"}] )
 
     Parâmetros
     ----------

@@ -11,11 +11,11 @@ def basic(
     titulo="",
     NOMEvecx="EIXO X",
     NOMEvecy="EIXO Y",
-    HaveGrid=True,
+    HaveGrid=False,
     HaveBox=True,
     escala="linear",
     cor="black",
-    espessura=2.5,
+    espessura=2.0,
     fontetitulo=16,
     fonteeixos=12,
     estilo_linha="-",
@@ -23,11 +23,11 @@ def basic(
     cor_grade="#E6E6E6",
     largura_figura=10,
     altura_figura=6,
-    remover_bordas=True,
+    remover_bordas=False,
     marcador=None,
     save=False,
     dpi=600,
-    formato="png",
+    formato="pdf",
     nome="basicgraph",
     plot=True,
 ):
@@ -101,8 +101,23 @@ def basic(
     """
     import matplotlib.pyplot as plt
     import os
+    from matplotlib.ticker import AutoMinorLocator
 
-    fig, ax = plt.subplots(figsize=(largura_figura, altura_figura))
+    plt.rcParams.update(
+        {
+            "font.family": "serif",
+            "mathtext.fontset": "dejavuserif",
+            "axes.linewidth": 1.2,
+            "xtick.direction": "in",
+            "ytick.direction": "in",
+            "xtick.top": True,
+            "ytick.right": True,
+            "xtick.labelsize": fonteeixos - 2,
+            "ytick.labelsize": fonteeixos - 2,
+            "legend.frameon": False,
+        }
+    )
+    fig, ax = plt.subplots(figsize=(largura_figura, altura_figura), dpi=100)
     ax.plot(
         vecx,
         vecy,
@@ -111,33 +126,47 @@ def basic(
         linestyle=estilo_linha,
         alpha=alpha_linha,
         marker=marcador,
-        label=titulo,
+        label=titulo if titulo else None,
     )
-    ax.set_title(
-        titulo, fontsize=fontetitulo, pad=20, fontweight="bold", color="#333333"
-    )
-    ax.set_xlabel(NOMEvecx, fontsize=fonteeixos, labelpad=10)
-    ax.set_ylabel(NOMEvecy, fontsize=fonteeixos, labelpad=10)
+    if titulo:
+        ax.set_title(titulo, fontsize=fontetitulo, pad=15, fontweight="bold")
+    ax.set_xlabel(NOMEvecx, fontsize=fonteeixos, labelpad=8)
+    ax.set_ylabel(NOMEvecy, fontsize=fonteeixos, labelpad=8)
     ax.set_xscale(escala)
     ax.set_yscale(escala)
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    ax.tick_params(which="major", length=6, width=1.2)
+    ax.tick_params(which="minor", length=3, width=1.0)
     if HaveGrid:
-        ax.grid(True, linestyle="--", linewidth=0.5, color=cor_grade)
+        ax.grid(True, linestyle="--", linewidth=0.5, color=cor_grade, alpha=0.7)
         ax.set_axisbelow(True)
     if not HaveBox:
         ax.set_frame_on(False)
     elif remover_bordas:
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.spines["left"].set_color("#CCCCCC")
-        ax.spines["bottom"].set_color("#CCCCCC")
+    else:
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color("black")
     plt.tight_layout()
     if save:
         if not os.path.exists("figures"):
             os.makedirs("figures")
         caminho = f"figures/{nome}.{formato}"
         plt.savefig(caminho, dpi=dpi, bbox_inches="tight")
+
+        plt.savefig(
+            caminho, dpi=dpi, bbox_inches="tight", facecolor="white", transparent=False
+        )
+        print(f"Gráfico salvo com sucesso em: {caminho}")
+
     if plot:
         plt.show()
+    else:
+        plt.close(fig)
+
     return None
 
 
@@ -148,26 +177,26 @@ def multi(
     titulo="",
     NOMEvecx="EIXO X",
     NOMEvecy="EIXO Y",
-    HaveGrid=True,
+    HaveGrid=False,
     HaveBox=True,
     escala="linear",
     cor_estilo="random",
-    espessura=2.5,
-    fontetitulo=16,
+    espessura=1.5,
+    fontetitulo=14,
     fonteeixos=12,
     estilo_linha="-",
-    alpha_linha=0.7,
+    alpha_linha=1.0,
     cor_grade="#E6E6E6",
-    largura_figura=10,
+    largura_figura=8,
     altura_figura=6,
-    remover_bordas=True,
+    remover_bordas=False,
     marcador=None,
     mostrar_legenda=True,
     titulo_legenda=None,
     box_legenda=False,
     save=False,
     dpi=600,
-    formato="png",
+    formato="pdf",
     nome="multigraph",
     plot=True,
 ):
@@ -248,13 +277,30 @@ def multi(
     """
     import matplotlib.pyplot as plt
     import os
+    from matplotlib.ticker import AutoMinorLocator
+
+    plt.rcParams.update(
+        {
+            "font.family": "serif",
+            "mathtext.fontset": "dejavuserif",
+            "axes.linewidth": 1.2,
+            "xtick.direction": "in",
+            "ytick.direction": "in",
+            "xtick.top": True,
+            "ytick.right": True,
+            "xtick.labelsize": fonteeixos - 2,
+            "ytick.labelsize": fonteeixos - 2,
+        }
+    )
 
     if len(list_vecx) != len(list_vecy):
         raise ValueError(
             "O número de listas em X deve ser igual ao número de listas em Y."
         )
-    fig, ax = plt.subplots(figsize=(largura_figura, altura_figura))
+
+    fig, ax = plt.subplots(figsize=(largura_figura, altura_figura), dpi=100)
     n_curvas = len(list_vecx)
+
     if cor_estilo == "preto":
         cores = ["black"] * n_curvas
     elif cor_estilo == "random":
@@ -264,6 +310,7 @@ def multi(
         cores = cor_estilo
     else:
         cores = [cor_estilo] * n_curvas
+
     for i in range(n_curvas):
         label_curva = nomes_curvas[i] if nomes_curvas else f"Curva {i+1}"
         ax.plot(
@@ -276,13 +323,20 @@ def multi(
             marker=marcador,
             label=label_curva,
         )
-    ax.set_title(
-        titulo, fontsize=fontetitulo, pad=20, fontweight="bold", color="#333333"
-    )
-    ax.set_xlabel(NOMEvecx, fontsize=fonteeixos, labelpad=10)
-    ax.set_ylabel(NOMEvecy, fontsize=fonteeixos, labelpad=10)
+
+    if titulo:
+        ax.set_title(titulo, fontsize=fontetitulo, pad=15, fontweight="bold")
+
+    ax.set_xlabel(NOMEvecx, fontsize=fonteeixos, labelpad=8)
+    ax.set_ylabel(NOMEvecy, fontsize=fonteeixos, labelpad=8)
     ax.set_xscale(escala)
     ax.set_yscale(escala)
+
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    ax.tick_params(which="major", length=6, width=1.2)
+    ax.tick_params(which="minor", length=3, width=1.0)
+
     if mostrar_legenda:
         ax.legend(
             title=titulo_legenda,
@@ -290,25 +344,36 @@ def multi(
             fontsize=fonteeixos * 0.9,
             title_fontsize=fonteeixos,
             loc="best",
+            edgecolor="black" if box_legenda else None,
         )
+
     if HaveGrid:
-        ax.grid(True, linestyle="--", linewidth=0.5, color=cor_grade)
+        ax.grid(True, linestyle="--", linewidth=0.5, color=cor_grade, alpha=0.7)
         ax.set_axisbelow(True)
+
     if not HaveBox:
         ax.set_frame_on(False)
     elif remover_bordas:
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.spines["left"].set_color("#CCCCCC")
-        ax.spines["bottom"].set_color("#CCCCCC")
+    else:
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color("black")
+
     plt.tight_layout()
+
     if save:
         if not os.path.exists("figures"):
             os.makedirs("figures")
         caminho = f"figures/{nome}.{formato}"
-        plt.savefig(caminho, dpi=dpi, bbox_inches="tight")
+        plt.savefig(caminho, dpi=dpi, bbox_inches="tight", facecolor="white")
+
     if plot:
         plt.show()
+    else:
+        plt.close(fig)
+
     return None
 
 
@@ -486,19 +551,19 @@ def basicdot(
     titulo="",
     NOMEvecx="EIXO X",
     NOMEvecy="EIXO Y",
-    HaveGrid=True,
+    HaveGrid=False,
     HaveBox=True,
     escala="linear",
     cor="black",
-    espessura=2.5,
-    fontetitulo=16,
+    espessura=1.5,
+    fontetitulo=14,
     fonteeixos=12,
     estilo_linha="-",
-    alpha_linha=0.7,
+    alpha_linha=1.0,
     cor_grade="#E6E6E6",
-    largura_figura=10,
+    largura_figura=8,
     altura_figura=6,
-    remover_bordas=True,
+    remover_bordas=False,
     marcador=None,
     cor_ponto="red",
     marcador_ponto="*",
@@ -506,7 +571,7 @@ def basicdot(
     label_ponto="Destaque",
     save=False,
     dpi=600,
-    formato="png",
+    formato="pdf",
     nome="basicdot_graph",
     plot=True,
 ):
@@ -586,8 +651,24 @@ def basicdot(
     """
     import os
     from matplotlib import pyplot as plt
+    from matplotlib.ticker import AutoMinorLocator
 
-    fig, ax = plt.subplots(figsize=(largura_figura, altura_figura))
+    plt.rcParams.update(
+        {
+            "font.family": "serif",
+            "mathtext.fontset": "dejavuserif",
+            "axes.linewidth": 1.2,
+            "xtick.direction": "in",
+            "ytick.direction": "in",
+            "xtick.top": True,
+            "ytick.right": True,
+            "xtick.labelsize": fonteeixos - 2,
+            "ytick.labelsize": fonteeixos - 2,
+        }
+    )
+
+    fig, ax = plt.subplots(figsize=(largura_figura, altura_figura), dpi=100)
+
     ax.plot(
         vecx,
         vecy,
@@ -598,6 +679,7 @@ def basicdot(
         marker=marcador,
         label=titulo if titulo else "Dados",
     )
+
     if ponto_destaque is not None:
         ax.scatter(
             ponto_destaque[0],
@@ -608,31 +690,48 @@ def basicdot(
             label=label_ponto,
             zorder=5,
         )
-    ax.set_title(
-        titulo, fontsize=fontetitulo, pad=20, fontweight="bold", color="#333333"
-    )
-    ax.set_xlabel(NOMEvecx, fontsize=fonteeixos, labelpad=10)
-    ax.set_ylabel(NOMEvecy, fontsize=fonteeixos, labelpad=10)
+
+    if titulo:
+        ax.set_title(titulo, fontsize=fontetitulo, pad=15, fontweight="bold")
+
+    ax.set_xlabel(NOMEvecx, fontsize=fonteeixos, labelpad=8)
+    ax.set_ylabel(NOMEvecy, fontsize=fonteeixos, labelpad=8)
     ax.set_xscale(escala)
     ax.set_yscale(escala)
+
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    ax.tick_params(which="major", length=6, width=1.2)
+    ax.tick_params(which="minor", length=3, width=1.0)
+
     if titulo or ponto_destaque:
         ax.legend(frameon=False, fontsize=fonteeixos * 0.9)
+
     if HaveGrid:
-        ax.grid(True, linestyle="--", linewidth=0.5, color=cor_grade)
+        ax.grid(True, linestyle="--", linewidth=0.5, color=cor_grade, alpha=0.7)
         ax.set_axisbelow(True)
+
     if not HaveBox:
         ax.set_frame_on(False)
     elif remover_bordas:
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.spines["left"].set_color("#CCCCCC")
-        ax.spines["bottom"].set_color("#CCCCCC")
+    else:
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color("black")
+
     plt.tight_layout()
+
     if save:
         if not os.path.exists("figures"):
             os.makedirs("figures")
         caminho = f"figures/{nome}.{formato}"
-        plt.savefig(caminho, dpi=dpi, bbox_inches="tight")
+        plt.savefig(caminho, dpi=dpi, bbox_inches="tight", facecolor="white")
+
     if plot:
         plt.show()
+    else:
+        plt.close(fig)
+
     return None
