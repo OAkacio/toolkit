@@ -51,7 +51,7 @@ def header(titulo, largura=80, **kwargs):
     )
     if kwargs:
         print(f"{GRAY}{DIV_L}{HL * (largura - 2)}{DIV_R}{RESET}")
-        info_str = "  •  ".join([f"{k.upper()}: {v}" for k, v in kwargs.items()])
+        info_str = "  |  ".join([f"{k.upper()}: {v}" for k, v in kwargs.items()])
         print(
             f"{GRAY}{VL}{RESET}{CYAN}{info_str:^{espaco_interno}}{RESET}{GRAY}{VL}{RESET}"
         )
