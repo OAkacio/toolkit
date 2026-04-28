@@ -2,120 +2,85 @@
 # * =============================================================================
 # * SYSTEM
 # * =============================================================================
+#
 
+import os
 
-def header(titulo, largura=80, **kwargs):
+def header(title, width=80, **kwargs):
     """
-    Gera um cabeçalho visual elegante com bordas duplas, cores e metadados.
+    Gera um cabeçalho visual com bordas duplas, cores e metadados no terminal.
 
-    Esta função cria uma moldura estruturada utilizando caracteres de desenho
-    de caixa Unicode (estilo double-line) e códigos de escape ANSI para criar
-    uma separação visual sofisticada e profissional em terminais.
+    Args:
+        title (str): O texto principal a ser exibido no centro do cabeçalho.
+        width (int, optional): A largura total da moldura em caracteres. Default é 80.
+        **kwargs: Informações adicionais exibidas abaixo do título, formatadas como 'CHAVE: VALOR'.
 
-    (  "Meu título", var1=valor1, var2=valor2 ... )
+    Returns:
+        None
 
-    Parâmetros
-    ----------
-    titulo : str
-        O texto principal a ser exibido no centro do cabeçalho.
-    largura : int, opcional
-        A largura total da moldura em caracteres. O padrão é 80.
-    **kwargs : dict, opcional
-        Informações adicionais para exibir abaixo do título, formatadas como
-        'CHAVE: VALOR' e separadas por um marcador central (•).
-
-    Notas
-    -----
-    A função utiliza uma paleta de cores fixa para garantir elegância:
-    - Ouro (Gold): Para o título principal.
-    - Ciano (Cyan): Para os metadados (kwargs).
-    - Cinza (Gray): Para as bordas e separadores, reduzindo ruído visual.
-    A moldura utiliza caracteres Unicode (╔, ═, ╗, etc.) que podem não ser
-    renderizados corretamente em terminais legados sem suporte a UTF-8.
+    Example:
+        >>> sy.header("Iniciando Simulação", width=60, autor="Victor", grid="1024x1024")
     """
     CYAN = "\033[96m"
     BOLD = "\033[1m"
     GOLD = "\033[33m"
     GRAY = "\033[90m"
     RESET = "\033[0m"
+    
     TL, TR = "╔", "╗"
     BL, BR = "╚", "╝"
     HL, VL = "═", "║"
     DIV_L, DIV_R = "╠", "╣"
-    titulo_formatado = f" {titulo.upper()} "
+    
+    formatted_title = f" {title.upper()} "
+    inner_space = width - 2
+
     print("\n" * 2)
-    print(f"{GRAY}{TL}{HL * (largura - 2)}{TR}{RESET}")
-    espaco_interno = largura - 2
-    print(
-        f"{GRAY}{VL}{RESET}{BOLD}{GOLD}{titulo_formatado:^{espaco_interno}}{RESET}{GRAY}{VL}{RESET}"
-    )
+    print(f"{GRAY}{TL}{HL * inner_space}{TR}{RESET}")
+    print(f"{GRAY}{VL}{RESET}{BOLD}{GOLD}{formatted_title:^{inner_space}}{RESET}{GRAY}{VL}{RESET}")
+    
     if kwargs:
-        print(f"{GRAY}{DIV_L}{HL * (largura - 2)}{DIV_R}{RESET}")
+        print(f"{GRAY}{DIV_L}{HL * inner_space}{DIV_R}{RESET}")
         info_str = "  |  ".join([f"{k.upper()}: {v}" for k, v in kwargs.items()])
-        print(
-            f"{GRAY}{VL}{RESET}{CYAN}{info_str:^{espaco_interno}}{RESET}{GRAY}{VL}{RESET}"
-        )
-    print(f"{GRAY}{BL}{HL * (largura - 2)}{BR}{RESET}")
+        print(f"{GRAY}{VL}{RESET}{CYAN}{info_str:^{inner_space}}{RESET}{GRAY}{VL}{RESET}")
+        
+    print(f"{GRAY}{BL}{HL * inner_space}{BR}{RESET}")
     print("\n")
 
 
-def status(msg):
+def status(message):
     """
     Exibe uma mensagem de status minimalista e formatada no terminal.
 
-    Esta função gera uma saída visual discreta para indicar o progresso ou o
-    início de novas etapas no script. Ela utiliza um marcador colorido e
-    espaçamento estratégico para manter a organização sem poluir o terminal.
+    Args:
+        message (str): O texto descritivo do status ou evento atual a ser exibido.
 
-    (  "Minha Mensagem"  )
+    Returns:
+        None
 
-    Parâmetros
-    ----------
-    msg : str
-        O texto descritivo do status ou evento atual a ser exibido.
-
-    Notas
-    -----
-    A saída é composta por uma quebra de linha inicial, seguida pelo caractere
-    '»' (chevron duplo) estilizado em azul e negrito. O texto da mensagem é
-    exibido logo após o marcador, mantendo um recuo padrão à esquerda.
+    Example:
+        >>> sy.status("Calculando distâncias cosmológicas...")
     """
     BLUE = "\033[94m"
     BOLD = "\033[1m"
     RESET = "\033[0m"
-    print(f"\n  {BLUE}{BOLD}»{RESET} {msg}")
+    
+    print(f"\n  {BLUE}{BOLD}»{RESET} {message}")
 
 
 def param(*items, indent=6):
     """
     Exibe múltiplos parâmetros com alinhamento vertical e contraste de cores.
 
-    Esta função processa uma coleção de parâmetros e formata a saída para que
-    os nomes, os separadores de igualdade e as unidades físicas fiquem
-    perfeitamente alinhados, facilitando a leitura de dados técnicos e
-    relatórios científicos no terminal.
+    Args:
+        *items (tuple): Sequências contendo (nome, valor, [unidade]).
+        indent (int, optional): O número de espaços iniciais para o recuo no terminal. Default é 6.
 
-    (  ("Meu valor é", valor1, "unidade1") , ("Meu valor é", valor2, "unidade2")... )
+    Returns:
+        None
 
-    Parâmetros
-    ----------
-    *items : list ou tuple
-        Um número variável de sequências. Cada item deve conter:
-        - nome (str): O identificador do parâmetro.
-        - valor (any): O valor numérico ou textual associado.
-        - unidade (str, opcional): A unidade física de medida.
-    indent : int, opcional
-        O número de espaços iniciais para o recuo do bloco no terminal.
-        O padrão é 6.
-
-    Notas
-    -----
-    A função utiliza uma paleta de cores técnica para otimizar a leitura:
-    - Negrito (Bold): Destaca os nomes das variáveis à esquerda.
-    - Ciano (Cyan): Realça os valores numéricos (dados centrais).
-    - Cinza (Gray): Suaviza os elementos estruturais (= e colchetes).
-    O cálculo de largura é feito antes da inserção dos códigos ANSI,
-    garantindo que o alinhamento não seja quebrado por caracteres invisíveis.
+    Example:
+        >>> sy.param(("Velocidade Inicial", 300, "km/s"), ("Densidade", 1e5, "cm^-3"))
     """
     if not items:
         return
@@ -125,165 +90,130 @@ def param(*items, indent=6):
     GRAY = "\033[90m"
     RESET = "\033[0m"
 
-    processados = []
+    processed = []
     for item in items:
-        nome = str(item[0])
+        name = str(item[0])
         val = str(item[1])
-        unidade = str(item[2]) if len(item) > 2 else ""
-        processados.append((nome, val, unidade))
+        unit = str(item[2]) if len(item) > 2 else ""
+        processed.append((name, val, unit))
 
-    largura_n = max(len(p[0]) for p in processados)
-    largura_v = max(len(p[1]) for p in processados)
+    name_width = max(len(p[0]) for p in processed)
+    val_width = max(len(p[1]) for p in processed)
+    spacing = " " * indent
 
-    espacamento = " " * indent
+    for n, v, u in processed:
+        name_fmt = f"{BOLD}{n.ljust(name_width)}{RESET}"
+        separator = f"{GRAY}={RESET}"
+        val_fmt = f"{CYAN}{v.rjust(val_width)}{RESET}"
+        unit_fmt = f" {GRAY}[{u}]{RESET}" if u else ""
 
-    for n, v, u in processados:
-        nome_fmt = f"{BOLD}{n.ljust(largura_n)}{RESET}"
-        separador = f"{GRAY}={RESET}"
-        valor_fmt = f"{CYAN}{v.rjust(largura_v)}{RESET}"
-        unidade_fmt = f" {GRAY}[{u}]{RESET}" if u else ""
-
-        print(f"{espacamento}{nome_fmt} {separador} {valor_fmt}{unidade_fmt}")
+        print(f"{spacing}{name_fmt} {separator} {val_fmt}{unit_fmt}")
 
 
-def space(altura=3):
+def space(height=3):
     """
     Insere um distanciamento vertical no output do terminal.
 
-    Esta função gera um respiro visual no console através da impressão de
-    quebras de linha, permitindo separar seções de execução e evitar que a
-    saída de dados fique visualmente congestionada.
+    Args:
+        height (int, optional): O número de quebras de linha a serem impressas. Default é 3.
 
-    Parâmetros
-    ----------
-    altura : int, opcional
-        O número de quebras de linha a serem impressas.
-        O padrão é 3.
+    Returns:
+        None
 
-    Notas
-    -----
-    A função foca exclusivamente no deslocamento vertical do cursor, sem
-    adicionar caracteres, marcadores ou qualquer poluição visual, sendo
-    ideal para manter a sobriedade em logs e relatórios de terminal.
+    Example:
+        >>> sy.space(height=2)
     """
-    print("\n" * altura)
+    print("\n" * height)
 
 
-def table(*eixos, tipo="coluna", **kwargs):
+def table(*axes, mode="column", **kwargs):
     """
     Formata e exibe dados em uma estrutura de tabela ASCII.
 
-    Esta função foi aprimorada para receber tuplas de forma intuitiva,
-    convertendo-as internamente para a estrutura original de renderização.
+    Args:
+        *axes (tuple): Tuplas contendo os dados.
+        mode (str, optional): Define se as tuplas representam 'column' (coluna) ou 'row' (linha). Default é 'column'.
+        **kwargs: Permite passar os eixos de forma nomeada.
 
-    Exemplos de Uso:
-    1. Por Colunas (Padrão):
-       table(("ID", 1, 2), ("NOME", "Ana", "João"))
-       table(tipo="coluna", eixo1=("ID", 1, 2), eixo2=("NOME", "Ana", "João"))
+    Returns:
+        None
 
-    2. Por Linhas (A 1ª tupla define os cabeçalhos das colunas):
-       table(("ID", "NOME"), ("1", "Ana"), ("2", "João"), tipo="linha")
-
-    Parâmetros
-    ----------
-    *eixos : tuple
-        As tuplas contendo os dados.
-    tipo : str, opcional
-        Define se as tuplas representam 'coluna' ou 'linha'. Padrão é 'coluna'.
-    **kwargs : dict
-        Permite passar os eixos de forma nomeada (ex: eixo1=(...)).
+    Example:
+        >>> sy.table(("ID", 1, 2), ("NOME", "Estrela A", "Estrela B"), mode="column")
     """
-    # --- NOVA MECÂNICA DE RECEBIMENTO DE DADOS ---
-    # Unificando as entradas passadas sem nome (*eixos) e com nome (**kwargs)
-    entradas = list(eixos) + list(kwargs.values())
+    inputs = list(axes) + list(kwargs.values())
 
-    if not entradas:
+    if not inputs:
         print("A lista está vazia.")
         return
 
-    dados = []
-    if tipo == "coluna":
-        # O índice [0] de cada tupla é o cabeçalho. O restante [1:] são os valores.
-        chaves = [str(eixo[0]) for eixo in entradas]
-        valores_por_linha = zip(*[eixo[1:] for eixo in entradas])
-        
-        for valores in valores_por_linha:
-            dados.append(dict(zip(chaves, valores)))
+    data = []
+    if mode == "column":
+        keys = [str(axis[0]) for axis in inputs]
+        row_values = zip(*[axis[1:] for axis in inputs])
+        for values in row_values:
+            data.append(dict(zip(keys, values)))
 
-    elif tipo == "linha":
-        # A primeira tupla assume o papel de cabeçalhos das colunas. As seguintes são os valores.
-        chaves = [str(c) for c in entradas[0]]
-        linhas_dados = entradas[1:]
-        
-        for valores in linhas_dados:
-            dados.append(dict(zip(chaves, valores)))
+    elif mode == "row":
+        keys = [str(c) for c in inputs[0]]
+        row_lines = inputs[1:]
+        for values in row_lines:
+            data.append(dict(zip(keys, values)))
+            
     else:
-        print(f"Tipo '{tipo}' inválido. Use tipo='coluna' ou tipo='linha'.")
+        print(f"Tipo '{mode}' inválido. Use mode='column' ou mode='row'.")
         return
-    if not dados:
+        
+    if not data:
         print("A lista está vazia.")
         return
-    colunas = list(dados[0].keys())
-    larguras = {}
-    for coluna in colunas:
-        max_valor = max([len(str(item[coluna])) for item in dados])
-        larguras[coluna] = max(max_valor, len(coluna))
-    separador_horizontal = (
-        "+" + "+".join(["-" * (larguras[c] + 2) for c in colunas]) + "+"
-    )
+        
+    columns = list(data[0].keys())
+    widths = {}
+    
+    for col in columns:
+        max_val_len = max([len(str(item[col])) for item in data])
+        widths[col] = max(max_val_len, len(col))
+        
+    horizontal_separator = "+" + "+".join(["-" * (widths[c] + 2) for c in columns]) + "+"
+    
     BOLD = "\033[1m"
     RESET = "\033[0m"
     CYAN = "\033[36m"
-    print(separador_horizontal)
+    
+    print(horizontal_separator)
     header_str = "|"
-    for c in colunas:
-        header_str += f" {BOLD}{CYAN}{c.upper().center(larguras[c])}{RESET} |"
+    for c in columns:
+        header_str += f" {BOLD}{CYAN}{c.upper().center(widths[c])}{RESET} |"
     print(header_str)
-    print(separador_horizontal)
-    for item in dados:
-        linha = "|"
-        for c in colunas:
-            valor = str(item[c])
-            if valor.replace(".", "", 1).isdigit():
-                linha += f" {valor.rjust(larguras[c])} |"
+    print(horizontal_separator)
+    
+    for item in data:
+        line_str = "|"
+        for c in columns:
+            val = str(item[c])
+            if val.replace(".", "", 1).isdigit():
+                line_str += f" {val.rjust(widths[c])} |"
             else:
-                linha += f" {valor.ljust(larguras[c])} |"
-        print(linha)
-    print(separador_horizontal)
+                line_str += f" {val.ljust(widths[c])} |"
+        print(line_str)
+        
+    print(horizontal_separator)
 
 
-def cin(msg, formato="string"):
+def cin(message, expected_type="string"):
     """
     Recebe e valida a entrada do usuário com um visual colorido no terminal.
 
-    Esta função exibe um prompt personalizado, sinalizando uma requisição de
-    dados. Ela também garante a robustez do script capturando erros de
-    tipagem caso o usuário insira um formato incorreto, repetindo a
-    pergunta de forma suave e estilizada até obter um valor válido.
+    Args:
+        message (str): A mensagem ou pergunta a ser exibida para o usuário.
+        expected_type (str, optional): Tipo de dado ('int', 'float' ou 'string'). Default é 'string'.
 
-    (  "Qual é a sua idade?", "int"  )
+    Returns:
+        any: O valor inserido pelo usuário convertido para o tipo especificado.
 
-    Parâmetros
-    ----------
-    msg : str
-        A mensagem ou pergunta a ser exibida para o usuário.
-    formato : str, opcional
-        O tipo de dado esperado da entrada. Os valores aceitos são:
-        'int', 'float' ou 'string'. O padrão é 'string'.
-
-    Retornos
-    --------
-    any
-        O valor inserido pelo usuário, devidamente convertido para o tipo
-        especificado no parâmetro `formato`.
-
-    Notas
-    -----
-    A interface utiliza a seguinte paleta de cores:
-    - Ouro (Gold): Marcador de interrogação ('?'), indicando uma ação requerida.
-    - Cinza (Gray): Indicador discreto do tipo esperado, ex: [int].
-    - Ciano (Cyan): Cursor de entrada ('»').
-    - Vermelho (Red): Mensagem de erro caso a conversão de tipo falhe.
+    Example:
+        >>> limite_max = sy.cin("Insira o limite superior da integração", expected_type="float")
     """
     GOLD = "\033[33m"
     CYAN = "\033[36m"
@@ -292,115 +222,116 @@ def cin(msg, formato="string"):
     BOLD = "\033[1m"
     RESET = "\033[0m"
 
-    # Marcadores estéticos
-    marcador_pergunta = f"{GOLD}{BOLD}?{RESET}"
-    marcador_erro = f"{RED}{BOLD}!{RESET}"
+    question_mark = f"{GOLD}{BOLD}?{RESET}"
+    error_mark = f"{RED}{BOLD}!{RESET}"
     cursor = f"{CYAN}»{RESET}"
 
     while True:
-        # Montagem do prompt estilizado (ex:  ? Qual o valor? [float] » )
-        prompt = f"\n  {marcador_pergunta} {msg} {GRAY}[{formato}]{RESET} {cursor} "
-        
-        entrada = input(prompt)
-        
-        try:
-            if formato.lower() == 'int':
-                return int(entrada)
-            elif formato.lower() == 'float':
-                # Replace da vírgula por ponto para evitar erros de digitação comuns no Brasil
-                return float(entrada.replace(',', '.'))
-            elif formato.lower() == 'string':
-                return str(entrada)
-            else:
-                # Caso o desenvolvedor passe um formato não mapeado
-                print(f"\n  {marcador_erro} {GRAY}Erro no código: Formato '{formato}' não reconhecido. Use 'int', 'float' ou 'string'.{RESET}")
-                return None
-                
-        except ValueError:
-            # Retorno de erro elegante para o usuário, sem quebrar o script principal
-            print(f"  {marcador_erro} {GRAY}Entrada inválida. Por favor, insira um valor numérico do tipo '{formato}'.{RESET}")
+        prompt = f"\n  {question_mark} {message} {GRAY}[{expected_type}]{RESET} {cursor} "
+        user_input = input(prompt)
 
-def ok(lista, one=False):
-    if one:
-        BLUE = "\033[94m"
-        BOLD = "\033[1m"
-        RESET = "\033[0m"
-        CYAN = "\033[36m"
-        print(f"             {BLUE}{BOLD}»{RESET} {f"{CYAN}[OK]{RESET}   {lista}"}")
+        try:
+            if expected_type.lower() == "int":
+                return int(user_input)
+            elif expected_type.lower() == "float":
+                return float(user_input.replace(",", "."))
+            elif expected_type.lower() == "string":
+                return str(user_input)
+            else:
+                print(f"\n  {error_mark} {GRAY}Erro: Formato '{expected_type}' não reconhecido. Use 'int', 'float' ou 'string'.{RESET}")
+                return None
+        except ValueError:
+            print(f"  {error_mark} {GRAY}Entrada inválida. Insira um valor numérico do tipo '{expected_type}'.{RESET}")
+
+
+def ok(item_list, is_single=False):
+    """
+    Exibe uma confirmação visual estilizada de sucesso para um ou múltiplos itens.
+
+    Args:
+        item_list (list ou str): Item único ou lista de itens concluídos.
+        is_single (bool, optional): Se True, trata a entrada como um item único. Default é False.
+
+    Returns:
+        None
+
+    Example:
+        >>> sy.ok("Geração de matriz", is_single=True)
+        >>> sy.ok(["Módulo 1", "Módulo 2"])
+    """
+    BLUE = "\033[94m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+    CYAN = "\033[36m"
+    
+    prefix = f"            {BLUE}{BOLD}»{RESET} {CYAN}[OK]{RESET}  "
+    
+    if is_single:
+        print(f"{prefix} {item_list}")
         return
-    for item in lista:
-        BLUE = "\033[94m"
-        BOLD = "\033[1m"
-        RESET = "\033[0m"
-        CYAN = "\033[36m"
-        print(f"             {BLUE}{BOLD}»{RESET} {f"{CYAN}[OK]{RESET}   {item}"}")
+        
+    for item in item_list:
+        print(f"{prefix} {item}")
+
 
 def fim():
+    """
+    Imprime uma mensagem visual de finalização de script no terminal.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    Example:
+        >>> sy.fim()
+    """
     CYAN = "\033[36m"
     RESET = "\033[0m"
     BLUE = "\033[94m"
+    
     print(f"\n     {BLUE}»»»»{CYAN} EXECUÇÃO FINALIZADA!{RESET}\n")
 
 
-def help(arquivo):
+def help(filepath):
     """
-    Exibe um arquivo de texto formatado como tabela em um estilo visual suave.
+    Lê e exibe um arquivo de texto no terminal utilizando uma paleta de cores minimalista (stealth).
 
-    Esta função lê um arquivo .txt contendo uma tabela ASCII (nos mesmos moldes
-    gerados pela função `table`) e a renderiza no terminal com uma paleta de
-    cores mais escura, apagada e minimalista. Ideal para menus de ajuda ou
-    tabelas de referência que não devem ofuscar a interface principal.
+    Args:
+        filepath (str): Caminho para o arquivo de texto contendo a tabela ASCII.
 
-    (  "ajuda.txt"  )
+    Returns:
+        None
 
-    Parâmetros
-    ----------
-    arquivo : str
-        O caminho para o arquivo de texto contendo a tabela ASCII.
-
-    Notas
-    -----
-    A interface utiliza uma paleta "stealth" (discreta):
-    - Cinza Escuro (Dark Gray): Para as bordas e separadores da tabela (+, -, |).
-    - Opaco/Escurecido (Dim): Para o conteúdo em texto, tornando a leitura
-      confortável e reduzindo o contraste na tela.
+    Example:
+        >>> sy.help("data/instrucoes.txt")
     """
-    import os
-
     DARK_GRAY = "\033[90m"
     DIM = "\033[2m"
     RED = "\033[91m"
     BOLD = "\033[1m"
     RESET = "\033[0m"
 
-    # Verificação elegante de erro caso o arquivo txt não exista
-    if not os.path.exists(arquivo):
-        print(f"\n  {RED}{BOLD}!{RESET} {DARK_GRAY}Arquivo de ajuda '{arquivo}' não encontrado.{RESET}")
+    if not os.path.exists(filepath):
+        print(f"\n  {RED}{BOLD}!{RESET} {DARK_GRAY}Arquivo de ajuda '{filepath}' não encontrado.{RESET}")
         return
 
-    print() # Respiro inicial
-    
-    with open(arquivo, 'r', encoding='utf-8-sig') as f:
-        for linha in f:
-            # Removemos apenas a quebra de linha do final, preservando espaços internos
-            linha = linha.rstrip('\n')
-            
-            if not linha:
+    print() 
+
+    with open(filepath, "r", encoding="utf-8-sig") as file:
+        for line in file:
+            line = line.rstrip("\n")
+
+            if not line:
                 continue
-                
-            # Renderização sutil
-            if linha.startswith('+'):
-                # Separadores horizontais (+---+---+) ficam inteiramente em cinza escuro
-                print(f"  {DARK_GRAY}{linha}{RESET}")
-                
-            elif linha.startswith('|'):
-                # Nas linhas de dados, substituímos a barra vertical (|) para que 
-                # a barra fique cinza e o texto interno aplique o filtro 'DIM' (opaco)
-                linha_formatada = linha.replace('|', f"{RESET}{DARK_GRAY}|{RESET}{DIM}")
-                print(f"  {DIM}{linha_formatada}{RESET}")
-                
+
+            if line.startswith("+"):
+                print(f"  {DARK_GRAY}{line}{RESET}")
+            elif line.startswith("|"):
+                formatted_line = line.replace("|", f"{RESET}{DARK_GRAY}|{RESET}{DIM}")
+                print(f"  {DIM}{formatted_line}{RESET}")
             else:
-                # Qualquer outra linha fora da estrutura da tabela fica esmaecida
-                print(f"  {DARK_GRAY}{DIM}{linha}{RESET}")
-                
-    print() # Respiro final
+                print(f"  {DARK_GRAY}{DIM}{line}{RESET}")
+
+    print()

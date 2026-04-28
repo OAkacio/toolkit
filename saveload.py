@@ -1,114 +1,185 @@
 #
 # * =============================================================================
-# * SYSTEM
+# * SAVE LOAD
 # * =============================================================================
+#
 
+import os
 
-def savetable(nome, matriz, vertical=True, header=None, sep="\t"):
-    import os
+def savetable(filename, data_matrix, is_vertical=True, header=None, separator="\t"):
+    """
+    Salva uma matriz de dados em um arquivo de texto dentro do diretório 'data/'.
+
+    Args:
+        filename (str): Nome do arquivo a ser salvo (sem a extensão .txt).
+        data_matrix (list ou tuple): Matriz de dados (1D ou 2D) a ser salva.
+        is_vertical (bool, optional): Se True, transpõe a matriz antes de salvar (salva em colunas). Default é True.
+        header (str ou list, optional): Cabeçalho a ser inserido no topo do arquivo. Default é None.
+        separator (str, optional): Caractere separador entre os dados. Default é "\\t" (tabulação).
+
+    Returns:
+        None
+
+    Example:
+        >>> tempos = [0.1, 0.2, 0.3]
+        >>> densidades = [1e4, 1.2e4, 1.5e4]
+        >>> sy.savetable("resultados_densidade", [tempos, densidades], header="Tempo(s)\\tDensidade(cm^-3)")
+    """
     folder = "data"
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-    caminho = os.path.join(folder, f"{nome}.txt")
+    filepath = os.path.join(folder, f"{filename}.txt")
     
-    # --- CORREÇÃO AQUI ---
-    # Se for uma lista 1D (ex: uma única coluna de strings ou números), 
-    # envolvemos ela em outra lista para forçar o formato de matriz 2D.
-    if matriz and not isinstance(matriz[0], (list, tuple)):
-        matriz = [matriz]
+    # Se for uma lista 1D, é envolvida em outra lista para garantir formato de matriz 2D
+    if data_matrix and not isinstance(data_matrix[0], (list, tuple)):
+        data_matrix = [data_matrix]
 
-    # Agora o zip() funcionará corretamente sem fatiar as strings
-    dados_para_salvar = zip(*matriz) if vertical else matriz
+    data_to_save = zip(*data_matrix) if is_vertical else data_matrix
 
-    with open(caminho, "w", encoding="utf-8") as f:
+    with open(filepath, "w", encoding="utf-8") as file:
         if header:
-            linhas_header = header.split("\n") if isinstance(header, str) else header
-            for linha_h in linhas_header:
-                f.write(f"# {linha_h}\n")
+            header_lines = header.split("\n") if isinstance(header, str) else header
+            for h_line in header_lines:
+                file.write(f"# {h_line}\n")
 
-        for linha in dados_para_salvar:
-            # Transformamos tudo para string e unimos com o separador
-            string_linha = sep.join(map(str, linha))
-            f.write(string_linha + "\n")
+        for row in data_to_save:
+            row_string = separator.join(map(str, row))
+            file.write(row_string + "\n")
 
 
-def loadtable(nome, vertical=True, sep="\t"):
-    import os
+def loadtable(filepath, is_vertical=True, separator="\t"):
+    """
+    Lê um arquivo de texto e o converte em uma matriz de dados, ignorando comentários.
 
-    caminho = os.path.join(f"{nome}")
-    if not os.path.exists(caminho):
+    Args:
+        filepath (str): Caminho completo (ou relativo) do arquivo a ser lido, incluindo extensão.
+        is_vertical (bool, optional): Se True, transpõe a matriz lida (retorna colunas como listas). Default é True.
+        separator (str, optional): Caractere separador utilizado no arquivo. Default é "\\t".
+
+    Returns:
+        list: Matriz contendo os dados lidos. Retorna None se o arquivo não for encontrado.
+
+    Example:
+        >>> dados = sy.loadtable("data/resultados_densidade.txt")
+        >>> tempos = dados[0]
+        >>> densidades = dados[1]
+    """
+    if not os.path.exists(filepath):
+        print(f"Arquivo não encontrado: {filepath}")
         return None
         
-    matriz_lida = []
-    with open(caminho, "r", encoding="utf-8-sig") as f:
-        for linha in f:
-            linha = linha.strip()
-            # Ignora linhas vazias ou comentários
-            if not linha or linha.startswith("#"):
+    read_matrix = []
+    with open(filepath, "r", encoding="utf-8-sig") as file:
+        for line in file:
+            line = line.strip()
+            if not line or line.startswith("#"):
                 continue
                 
-            valores = []
-            for x in linha.split(sep):
-                item = x.strip()
+            values = []
+            for item in line.split(separator):
+                item = item.strip()
                 try:
-                    # Tenta converter para float
-                    valores.append(float(item))
+                    values.append(float(item))
                 except ValueError:
-                    # Se falhar (for um texto), adiciona como string
-                    valores.append(item)
+                    values.append(item)
                     
-            matriz_lida.append(valores)
+            read_matrix.append(values)
             
-    # Transpõe a matriz caso a leitura seja vertical
-    if vertical:
-        matriz_lida = [list(item) for item in zip(*matriz_lida)]
+    if is_vertical and read_matrix:
+        read_matrix = [list(column) for column in zip(*read_matrix)]
         
-    return matriz_lida
+    return read_matrix
 
 
-def identificadora(caminho):
-    import os
+def identificadora(filepath):
+    """
+    Identifica automaticamente o caractere separador mais provável de um arquivo de texto de dados.
 
-    if not os.path.exists(caminho):
+    Args:
+        filepath (str): Caminho completo do arquivo a ser analisado.
+
+    Returns:
+        str: O separador identificado ("\\t", ",", ";" ou " "). Retorna "\\t" como fallback.
+
+    Example:
+        >>> sep_correto = sy.identificadora("data/meus_dados.csv")
+        >>> print(repr(sep_correto))
+        ','
+    """
+    if not os.path.exists(filepath):
         return None
-    candidatos = ["\t", ",", ";", " "]
-    with open(caminho, "r", encoding="utf-8") as f:
-        for linha in f:
-            linha = linha.strip()
-            if not linha or linha.startswith("#"):
+        
+    candidates = ["\t", ",", ";", " "]
+    
+    with open(filepath, "r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
+            if not line or line.startswith("#"):
                 continue
-            contagem = {sep: linha.count(sep) for sep in candidatos}
-            melhor_sep = max(contagem, key=contagem.get)
-            return melhor_sep if contagem[melhor_sep] > 0 else "\t"
+                
+            counts = {sep: line.count(sep) for sep in candidates}
+            best_separator = max(counts, key=counts.get)
+            
+            return best_separator if counts[best_separator] > 0 else "\t"
+            
     return "\t"
 
 
-def ler_cabecalho(nome):
-    import os
+def ler_cabecalho(filename):
+    """
+    Lê exclusivamente o cabeçalho (linhas iniciadas por '#') de um arquivo no diretório 'data/'.
 
-    caminho = os.path.join("data", f"{nome}.txt")
-    if not os.path.exists(caminho):
+    Args:
+        filename (str): Nome do arquivo (sem extensão).
+
+    Returns:
+        list: Lista de strings contendo as linhas do cabeçalho. Retorna None se não encontrar o arquivo.
+
+    Example:
+        >>> headers = sy.ler_cabecalho("resultados_densidade")
+        >>> print(headers)
+        ['Tempo(s)\\tDensidade(cm^-3)']
+    """
+    filepath = os.path.join("data", f"{filename}.txt")
+    
+    if not os.path.exists(filepath):
         return None
-    header = []
-    with open(caminho, "r", encoding="utf-8-sig") as f:
-        for linha in f:
-            if linha.startswith("#"):
-                header.append(linha.replace("#", "").strip())
+        
+    header_lines = []
+    
+    with open(filepath, "r", encoding="utf-8-sig") as file:
+        for line in file:
+            if line.startswith("#"):
+                header_lines.append(line.replace("#", "").strip())
             else:
                 break
-    return header
+                
+    return header_lines
 
 
-def versionador(nome):
-    import os
+def versionador(filename):
+    """
+    Verifica se um arquivo já existe no diretório 'data/' e retorna um nome com sufixo numérico para evitar sobrescrita.
 
+    Args:
+        filename (str): Nome base do arquivo que se deseja salvar.
+
+    Returns:
+        str: Nome do arquivo original ou acrescido de um sufixo numérico (ex: 'nome_1', 'nome_2').
+
+    Example:
+        >>> novo_nome = sy.versionador("tabela_vento")
+        >>> sy.savetable(novo_nome, dados)
+    """
     folder = "data"
-    caminho = os.path.join(folder, f"{nome}.txt")
-    if not os.path.exists(caminho):
-        return nome
+    filepath = os.path.join(folder, f"{filename}.txt")
+    
+    if not os.path.exists(filepath):
+        return filename
 
-    contador = 1
-    while os.path.exists(os.path.join(folder, f"{nome}_{contador}.txt")):
-        contador += 1
-    return f"{nome}_{contador}"
+    counter = 1
+    while os.path.exists(os.path.join(folder, f"{filename}_{counter}.txt")):
+        counter += 1
+        
+    return f"{filename}_{counter}"
