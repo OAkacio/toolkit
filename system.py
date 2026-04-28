@@ -43,6 +43,7 @@ def header(titulo, largura=80, **kwargs):
     HL, VL = "═", "║"
     DIV_L, DIV_R = "╠", "╣"
     titulo_formatado = f" {titulo.upper()} "
+    print("\n" * 2)
     print(f"{GRAY}{TL}{HL * (largura - 2)}{TR}{RESET}")
     espaco_interno = largura - 2
     print(
@@ -168,32 +169,57 @@ def space(altura=3):
     print("\n" * altura)
 
 
-def table(dados):
+def table(*eixos, tipo="coluna", **kwargs):
     """
-    Formata e exibe uma lista de dicionários em uma estrutura de tabela ASCII.
+    Formata e exibe dados em uma estrutura de tabela ASCII.
 
-    Esta função transforma dados estruturados em uma representação visual
-    organizada, calculando dinamicamente a largura das colunas para garantir
-    o alinhamento perfeito de cabeçalhos e valores no terminal.
+    Esta função foi aprimorada para receber tuplas de forma intuitiva,
+    convertendo-as internamente para a estrutura original de renderização.
 
-    (    [{"COLUNA 1": "val1", "COLUNA 2": "val2"}, {"COLUNA 1": "val3", "COLUNA 2": "val4"}] )
+    Exemplos de Uso:
+    1. Por Colunas (Padrão):
+       table(("ID", 1, 2), ("NOME", "Ana", "João"))
+       table(tipo="coluna", eixo1=("ID", 1, 2), eixo2=("NOME", "Ana", "João"))
+
+    2. Por Linhas (A 1ª tupla define os cabeçalhos das colunas):
+       table(("ID", "NOME"), ("1", "Ana"), ("2", "João"), tipo="linha")
 
     Parâmetros
     ----------
-    dados : list of dict
-        Uma lista contendo dicionários, onde as chaves representam os nomes
-        das colunas e os valores representam o conteúdo de cada linha.
-
-    Notas
-    -----
-    A função aplica uma lógica de alinhamento inteligente para otimizar a
-    escaneabilidade:
-    - Cabeçalhos: Centralizados e destacados em negrito e ciano.
-    - Números: Alinhados à direita (facilitando a leitura de casas decimais).
-    - Textos: Alinhados à esquerda.
-    A moldura utiliza um estilo clássico de grade (ASCII Grid) que delimita
-    claramente a separação entre metadados e o corpo dos dados.
+    *eixos : tuple
+        As tuplas contendo os dados.
+    tipo : str, opcional
+        Define se as tuplas representam 'coluna' ou 'linha'. Padrão é 'coluna'.
+    **kwargs : dict
+        Permite passar os eixos de forma nomeada (ex: eixo1=(...)).
     """
+    # --- NOVA MECÂNICA DE RECEBIMENTO DE DADOS ---
+    # Unificando as entradas passadas sem nome (*eixos) e com nome (**kwargs)
+    entradas = list(eixos) + list(kwargs.values())
+
+    if not entradas:
+        print("A lista está vazia.")
+        return
+
+    dados = []
+    if tipo == "coluna":
+        # O índice [0] de cada tupla é o cabeçalho. O restante [1:] são os valores.
+        chaves = [str(eixo[0]) for eixo in entradas]
+        valores_por_linha = zip(*[eixo[1:] for eixo in entradas])
+        
+        for valores in valores_por_linha:
+            dados.append(dict(zip(chaves, valores)))
+
+    elif tipo == "linha":
+        # A primeira tupla assume o papel de cabeçalhos das colunas. As seguintes são os valores.
+        chaves = [str(c) for c in entradas[0]]
+        linhas_dados = entradas[1:]
+        
+        for valores in linhas_dados:
+            dados.append(dict(zip(chaves, valores)))
+    else:
+        print(f"Tipo '{tipo}' inválido. Use tipo='coluna' ou tipo='linha'.")
+        return
     if not dados:
         print("A lista está vazia.")
         return
@@ -226,6 +252,74 @@ def table(dados):
     print(separador_horizontal)
 
 
+def cin(msg, formato="string"):
+    """
+    Recebe e valida a entrada do usuário com um visual colorido no terminal.
+
+    Esta função exibe um prompt personalizado, sinalizando uma requisição de
+    dados. Ela também garante a robustez do script capturando erros de
+    tipagem caso o usuário insira um formato incorreto, repetindo a
+    pergunta de forma suave e estilizada até obter um valor válido.
+
+    (  "Qual é a sua idade?", "int"  )
+
+    Parâmetros
+    ----------
+    msg : str
+        A mensagem ou pergunta a ser exibida para o usuário.
+    formato : str, opcional
+        O tipo de dado esperado da entrada. Os valores aceitos são:
+        'int', 'float' ou 'string'. O padrão é 'string'.
+
+    Retornos
+    --------
+    any
+        O valor inserido pelo usuário, devidamente convertido para o tipo
+        especificado no parâmetro `formato`.
+
+    Notas
+    -----
+    A interface utiliza a seguinte paleta de cores:
+    - Ouro (Gold): Marcador de interrogação ('?'), indicando uma ação requerida.
+    - Cinza (Gray): Indicador discreto do tipo esperado, ex: [int].
+    - Ciano (Cyan): Cursor de entrada ('»').
+    - Vermelho (Red): Mensagem de erro caso a conversão de tipo falhe.
+    """
+    GOLD = "\033[33m"
+    CYAN = "\033[36m"
+    GRAY = "\033[90m"
+    RED = "\033[91m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+
+    # Marcadores estéticos
+    marcador_pergunta = f"{GOLD}{BOLD}?{RESET}"
+    marcador_erro = f"{RED}{BOLD}!{RESET}"
+    cursor = f"{CYAN}»{RESET}"
+
+    while True:
+        # Montagem do prompt estilizado (ex:  ? Qual o valor? [float] » )
+        prompt = f"\n  {marcador_pergunta} {msg} {GRAY}[{formato}]{RESET} {cursor} "
+        
+        entrada = input(prompt)
+        
+        try:
+            if formato.lower() == 'int':
+                return int(entrada)
+            elif formato.lower() == 'float':
+                # Replace da vírgula por ponto para evitar erros de digitação comuns no Brasil
+                return float(entrada.replace(',', '.'))
+            elif formato.lower() == 'string':
+                return str(entrada)
+            else:
+                # Caso o desenvolvedor passe um formato não mapeado
+                print(f"\n  {marcador_erro} {GRAY}Erro no código: Formato '{formato}' não reconhecido. Use 'int', 'float' ou 'string'.{RESET}")
+                return None
+                
+        except ValueError:
+            # Retorno de erro elegante para o usuário, sem quebrar o script principal
+            print(f"  {marcador_erro} {GRAY}Entrada inválida. Por favor, insira um valor numérico do tipo '{formato}'.{RESET}")
+
 def ok(lista, one=False):
     if one:
         BLUE = "\033[94m"
@@ -246,3 +340,67 @@ def fim():
     RESET = "\033[0m"
     BLUE = "\033[94m"
     print(f"\n     {BLUE}»»»»{CYAN} EXECUÇÃO FINALIZADA!{RESET}\n")
+
+
+def help(arquivo):
+    """
+    Exibe um arquivo de texto formatado como tabela em um estilo visual suave.
+
+    Esta função lê um arquivo .txt contendo uma tabela ASCII (nos mesmos moldes
+    gerados pela função `table`) e a renderiza no terminal com uma paleta de
+    cores mais escura, apagada e minimalista. Ideal para menus de ajuda ou
+    tabelas de referência que não devem ofuscar a interface principal.
+
+    (  "ajuda.txt"  )
+
+    Parâmetros
+    ----------
+    arquivo : str
+        O caminho para o arquivo de texto contendo a tabela ASCII.
+
+    Notas
+    -----
+    A interface utiliza uma paleta "stealth" (discreta):
+    - Cinza Escuro (Dark Gray): Para as bordas e separadores da tabela (+, -, |).
+    - Opaco/Escurecido (Dim): Para o conteúdo em texto, tornando a leitura
+      confortável e reduzindo o contraste na tela.
+    """
+    import os
+
+    DARK_GRAY = "\033[90m"
+    DIM = "\033[2m"
+    RED = "\033[91m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+
+    # Verificação elegante de erro caso o arquivo txt não exista
+    if not os.path.exists(arquivo):
+        print(f"\n  {RED}{BOLD}!{RESET} {DARK_GRAY}Arquivo de ajuda '{arquivo}' não encontrado.{RESET}")
+        return
+
+    print() # Respiro inicial
+    
+    with open(arquivo, 'r', encoding='utf-8-sig') as f:
+        for linha in f:
+            # Removemos apenas a quebra de linha do final, preservando espaços internos
+            linha = linha.rstrip('\n')
+            
+            if not linha:
+                continue
+                
+            # Renderização sutil
+            if linha.startswith('+'):
+                # Separadores horizontais (+---+---+) ficam inteiramente em cinza escuro
+                print(f"  {DARK_GRAY}{linha}{RESET}")
+                
+            elif linha.startswith('|'):
+                # Nas linhas de dados, substituímos a barra vertical (|) para que 
+                # a barra fique cinza e o texto interno aplique o filtro 'DIM' (opaco)
+                linha_formatada = linha.replace('|', f"{RESET}{DARK_GRAY}|{RESET}{DIM}")
+                print(f"  {DIM}{linha_formatada}{RESET}")
+                
+            else:
+                # Qualquer outra linha fora da estrutura da tabela fica esmaecida
+                print(f"  {DARK_GRAY}{DIM}{linha}{RESET}")
+                
+    print() # Respiro final

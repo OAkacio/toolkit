@@ -6,12 +6,19 @@
 
 def savetable(nome, matriz, vertical=True, header=None, sep="\t"):
     import os
-
     folder = "data"
     if not os.path.exists(folder):
         os.makedirs(folder)
 
     caminho = os.path.join(folder, f"{nome}.txt")
+    
+    # --- CORREÇÃO AQUI ---
+    # Se for uma lista 1D (ex: uma única coluna de strings ou números), 
+    # envolvemos ela em outra lista para forçar o formato de matriz 2D.
+    if matriz and not isinstance(matriz[0], (list, tuple)):
+        matriz = [matriz]
+
+    # Agora o zip() funcionará corretamente sem fatiar as strings
     dados_para_salvar = zip(*matriz) if vertical else matriz
 
     with open(caminho, "w", encoding="utf-8") as f:
@@ -21,6 +28,7 @@ def savetable(nome, matriz, vertical=True, header=None, sep="\t"):
                 f.write(f"# {linha_h}\n")
 
         for linha in dados_para_salvar:
+            # Transformamos tudo para string e unimos com o separador
             string_linha = sep.join(map(str, linha))
             f.write(string_linha + "\n")
 
@@ -31,16 +39,31 @@ def loadtable(nome, vertical=True, sep="\t"):
     caminho = os.path.join(f"{nome}")
     if not os.path.exists(caminho):
         return None
+        
     matriz_lida = []
     with open(caminho, "r", encoding="utf-8-sig") as f:
         for linha in f:
             linha = linha.strip()
+            # Ignora linhas vazias ou comentários
             if not linha or linha.startswith("#"):
                 continue
-            valores = [float(x) for x in linha.split(sep)]
+                
+            valores = []
+            for x in linha.split(sep):
+                item = x.strip()
+                try:
+                    # Tenta converter para float
+                    valores.append(float(item))
+                except ValueError:
+                    # Se falhar (for um texto), adiciona como string
+                    valores.append(item)
+                    
             matriz_lida.append(valores)
+            
+    # Transpõe a matriz caso a leitura seja vertical
     if vertical:
         matriz_lida = [list(item) for item in zip(*matriz_lida)]
+        
     return matriz_lida
 
 
