@@ -472,12 +472,9 @@ def elipse(
         cmap=cmap, 
         norm=norm, 
         extend=form,
-        antialiased=False
+        antialiased=True,  
+        rasterized=True   
     )
-    
-    for c in cf.collections:
-        c.set_edgecolor("face")
-        c.set_linewidth(1e-9)
 
     if niveis_elipse is not None:
         if nomes_sigmas is None:
