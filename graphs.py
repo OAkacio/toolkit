@@ -7,8 +7,14 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.ticker import AutoMinorLocator, LogFormatterMathtext, LogLocator, MaxNLocator
+from matplotlib.ticker import (
+    AutoMinorLocator,
+    LogFormatterMathtext,
+    LogLocator,
+    MaxNLocator,
+)
 from matplotlib.colors import LogNorm
+
 
 def basic(
     x_data,
@@ -88,7 +94,7 @@ def basic(
             "legend.frameon": False,
         }
     )
-    
+
     fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=100)
     ax.plot(
         x_data,
@@ -100,10 +106,10 @@ def basic(
         marker=marker,
         label=title if title else None,
     )
-    
+
     if title:
         ax.set_title(title, fontsize=title_fontsize, pad=15, fontweight="bold")
-        
+
     ax.set_xlabel(x_label, fontsize=axis_fontsize, labelpad=8)
     ax.set_ylabel(y_label, fontsize=axis_fontsize, labelpad=8)
     ax.set_xscale(axis_scale)
@@ -112,11 +118,11 @@ def basic(
     ax.yaxis.set_minor_locator(AutoMinorLocator())
     ax.tick_params(which="major", length=6, width=1.2)
     ax.tick_params(which="minor", length=3, width=1.0)
-    
+
     if show_grid:
         ax.grid(True, linestyle="--", linewidth=0.5, color=grid_color, alpha=0.7)
         ax.set_axisbelow(True)
-        
+
     if not show_box:
         ax.set_frame_on(False)
     elif remove_borders:
@@ -126,9 +132,9 @@ def basic(
         for spine in ax.spines.values():
             spine.set_visible(True)
             spine.set_color("black")
-            
+
     plt.tight_layout()
-    
+
     if save_fig:
         if not os.path.exists("figures"):
             os.makedirs("figures")
@@ -231,7 +237,9 @@ def multi(
     )
 
     if len(x_list) != len(y_list):
-        raise ValueError("O número de listas em X deve ser igual ao número de listas em Y.")
+        raise ValueError(
+            "O número de listas em X deve ser igual ao número de listas em Y."
+        )
 
     fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=100)
     num_curves = len(x_list)
@@ -471,7 +479,13 @@ def elipse(
             sigma_name = sigma_names[i % len(sigma_names)]
 
             contour = ax.contour(
-                x_data, y_data, z_data, levels=[level], colors=[color], linestyles=style, linewidths=1.8
+                x_data,
+                y_data,
+                z_data,
+                levels=[level],
+                colors=[color],
+                linestyles=style,
+                linewidths=1.8,
             )
 
             if show_sigma:
@@ -517,9 +531,13 @@ def elipse(
         if z_scale == "log":
             cbar.ax.yaxis.set_major_formatter(LogFormatterMathtext())
             if colorbar_ticks is not None:
-                cbar.ax.yaxis.set_major_locator(LogLocator(base=10.0, numticks=colorbar_ticks))
+                cbar.ax.yaxis.set_major_locator(
+                    LogLocator(base=10.0, numticks=colorbar_ticks)
+                )
             else:
-                cbar.ax.yaxis.set_minor_locator(LogLocator(base=10.0, subs=np.arange(2, 10) * 0.1))
+                cbar.ax.yaxis.set_minor_locator(
+                    LogLocator(base=10.0, subs=np.arange(2, 10) * 0.1)
+                )
         else:
             if colorbar_ticks is not None:
                 cbar.ax.yaxis.set_major_locator(MaxNLocator(colorbar_ticks))
@@ -535,7 +553,9 @@ def elipse(
     ax.minorticks_on()
     ax.tick_params(which="minor", direction="in", top=True, right=True)
 
-    if highlight_point is not None or (extra_line_x is not None and extra_line_y is not None):
+    if highlight_point is not None or (
+        extra_line_x is not None and extra_line_y is not None
+    ):
         ax.legend(
             frameon=legend_frame,
             facecolor="white",

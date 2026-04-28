@@ -6,6 +6,7 @@
 
 import os
 
+
 def header(title, width=80, **kwargs):
     """
     Gera um cabeçalho visual com bordas duplas, cores e metadados no terminal.
@@ -26,24 +27,28 @@ def header(title, width=80, **kwargs):
     GOLD = "\033[33m"
     GRAY = "\033[90m"
     RESET = "\033[0m"
-    
+
     TL, TR = "╔", "╗"
     BL, BR = "╚", "╝"
     HL, VL = "═", "║"
     DIV_L, DIV_R = "╠", "╣"
-    
+
     formatted_title = f" {title.upper()} "
     inner_space = width - 2
 
     print("\n" * 2)
     print(f"{GRAY}{TL}{HL * inner_space}{TR}{RESET}")
-    print(f"{GRAY}{VL}{RESET}{BOLD}{GOLD}{formatted_title:^{inner_space}}{RESET}{GRAY}{VL}{RESET}")
-    
+    print(
+        f"{GRAY}{VL}{RESET}{BOLD}{GOLD}{formatted_title:^{inner_space}}{RESET}{GRAY}{VL}{RESET}"
+    )
+
     if kwargs:
         print(f"{GRAY}{DIV_L}{HL * inner_space}{DIV_R}{RESET}")
         info_str = "  |  ".join([f"{k.upper()}: {v}" for k, v in kwargs.items()])
-        print(f"{GRAY}{VL}{RESET}{CYAN}{info_str:^{inner_space}}{RESET}{GRAY}{VL}{RESET}")
-        
+        print(
+            f"{GRAY}{VL}{RESET}{CYAN}{info_str:^{inner_space}}{RESET}{GRAY}{VL}{RESET}"
+        )
+
     print(f"{GRAY}{BL}{HL * inner_space}{BR}{RESET}")
     print("\n")
 
@@ -64,7 +69,7 @@ def status(message):
     BLUE = "\033[94m"
     BOLD = "\033[1m"
     RESET = "\033[0m"
-    
+
     print(f"\n  {BLUE}{BOLD}»{RESET} {message}")
 
 
@@ -159,35 +164,37 @@ def table(*axes, mode="column", **kwargs):
         row_lines = inputs[1:]
         for values in row_lines:
             data.append(dict(zip(keys, values)))
-            
+
     else:
         print(f"Tipo '{mode}' inválido. Use mode='column' ou mode='row'.")
         return
-        
+
     if not data:
         print("A lista está vazia.")
         return
-        
+
     columns = list(data[0].keys())
     widths = {}
-    
+
     for col in columns:
         max_val_len = max([len(str(item[col])) for item in data])
         widths[col] = max(max_val_len, len(col))
-        
-    horizontal_separator = "+" + "+".join(["-" * (widths[c] + 2) for c in columns]) + "+"
-    
+
+    horizontal_separator = (
+        "+" + "+".join(["-" * (widths[c] + 2) for c in columns]) + "+"
+    )
+
     BOLD = "\033[1m"
     RESET = "\033[0m"
     CYAN = "\033[36m"
-    
+
     print(horizontal_separator)
     header_str = "|"
     for c in columns:
         header_str += f" {BOLD}{CYAN}{c.upper().center(widths[c])}{RESET} |"
     print(header_str)
     print(horizontal_separator)
-    
+
     for item in data:
         line_str = "|"
         for c in columns:
@@ -197,7 +204,7 @@ def table(*axes, mode="column", **kwargs):
             else:
                 line_str += f" {val.ljust(widths[c])} |"
         print(line_str)
-        
+
     print(horizontal_separator)
 
 
@@ -227,7 +234,9 @@ def cin(message, expected_type="string"):
     cursor = f"{CYAN}»{RESET}"
 
     while True:
-        prompt = f"\n  {question_mark} {message} {GRAY}[{expected_type}]{RESET} {cursor} "
+        prompt = (
+            f"\n  {question_mark} {message} {GRAY}[{expected_type}]{RESET} {cursor} "
+        )
         user_input = input(prompt)
 
         try:
@@ -238,39 +247,48 @@ def cin(message, expected_type="string"):
             elif expected_type.lower() == "string":
                 return str(user_input)
             else:
-                print(f"\n  {error_mark} {GRAY}Erro: Formato '{expected_type}' não reconhecido. Use 'int', 'float' ou 'string'.{RESET}")
+                print(
+                    f"\n  {error_mark} {GRAY}Erro: Formato '{expected_type}' não reconhecido. Use 'int', 'float' ou 'string'.{RESET}"
+                )
                 return None
         except ValueError:
-            print(f"  {error_mark} {GRAY}Entrada inválida. Insira um valor numérico do tipo '{expected_type}'.{RESET}")
+            print(
+                f"  {error_mark} {GRAY}Entrada inválida. Insira um valor numérico do tipo '{expected_type}'.{RESET}"
+            )
 
 
-def ok(item_list, is_single=False):
+def ok(messages, is_ok=True):
     """
-    Exibe uma confirmação visual estilizada de sucesso para um ou múltiplos itens.
+    Exibe uma confirmação visual estilizada de sucesso ou falha no terminal.
 
     Args:
-        item_list (list ou str): Item único ou lista de itens concluídos.
-        is_single (bool, optional): Se True, trata a entrada como um item único. Default é False.
+        messages (str ou list): Mensagem única ou lista de mensagens a serem exibidas.
+        is_ok (bool, optional): Se True, exibe a tag [OK] em ciano. Se False, exibe [NOK] em vermelho. Default é True.
 
     Returns:
         None
 
     Example:
-        >>> sy.ok("Geração de matriz", is_single=True)
-        >>> sy.ok(["Módulo 1", "Módulo 2"])
+        >>> sy.ok("Matriz de densidade carregada")
+        >>> sy.ok(["Arquivo corrompido", "Dados em branco"], is_ok=False)
     """
     BLUE = "\033[94m"
     BOLD = "\033[1m"
     RESET = "\033[0m"
     CYAN = "\033[36m"
-    
-    prefix = f"            {BLUE}{BOLD}»{RESET} {CYAN}[OK]{RESET}  "
-    
-    if is_single:
-        print(f"{prefix} {item_list}")
-        return
-        
-    for item in item_list:
+    RED = "\033[31m"
+
+    if is_ok:
+        status_tag = f"{CYAN}[OK]{RESET}"
+    else:
+        status_tag = f"{RED}[NOK]{RESET}"
+
+    prefix = f"            {BLUE}{BOLD}»{RESET} {status_tag}  "
+
+    if isinstance(messages, str):
+        messages = [messages]
+
+    for item in messages:
         print(f"{prefix} {item}")
 
 
@@ -290,7 +308,7 @@ def fim():
     CYAN = "\033[36m"
     RESET = "\033[0m"
     BLUE = "\033[94m"
-    
+
     print(f"\n     {BLUE}»»»»{CYAN} EXECUÇÃO FINALIZADA!{RESET}\n")
 
 
@@ -314,10 +332,12 @@ def help(filepath):
     RESET = "\033[0m"
 
     if not os.path.exists(filepath):
-        print(f"\n  {RED}{BOLD}!{RESET} {DARK_GRAY}Arquivo de ajuda '{filepath}' não encontrado.{RESET}")
+        print(
+            f"\n  {RED}{BOLD}!{RESET} {DARK_GRAY}Arquivo de ajuda '{filepath}' não encontrado.{RESET}"
+        )
         return
 
-    print() 
+    print()
 
     with open(filepath, "r", encoding="utf-8-sig") as file:
         for line in file:

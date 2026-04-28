@@ -6,6 +6,7 @@
 
 import os
 
+
 def savetable(filename, data_matrix, is_vertical=True, header=None, separator="\t"):
     """
     Salva uma matriz de dados em um arquivo de texto dentro do diretório 'data/'.
@@ -30,7 +31,7 @@ def savetable(filename, data_matrix, is_vertical=True, header=None, separator="\
         os.makedirs(folder)
 
     filepath = os.path.join(folder, f"{filename}.txt")
-    
+
     # Se for uma lista 1D, é envolvida em outra lista para garantir formato de matriz 2D
     if data_matrix and not isinstance(data_matrix[0], (list, tuple)):
         data_matrix = [data_matrix]
@@ -68,14 +69,14 @@ def loadtable(filepath, is_vertical=True, separator="\t"):
     if not os.path.exists(filepath):
         print(f"Arquivo não encontrado: {filepath}")
         return None
-        
+
     read_matrix = []
     with open(filepath, "r", encoding="utf-8-sig") as file:
         for line in file:
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-                
+
             values = []
             for item in line.split(separator):
                 item = item.strip()
@@ -83,12 +84,12 @@ def loadtable(filepath, is_vertical=True, separator="\t"):
                     values.append(float(item))
                 except ValueError:
                     values.append(item)
-                    
+
             read_matrix.append(values)
-            
+
     if is_vertical and read_matrix:
         read_matrix = [list(column) for column in zip(*read_matrix)]
-        
+
     return read_matrix
 
 
@@ -109,20 +110,20 @@ def identificadora(filepath):
     """
     if not os.path.exists(filepath):
         return None
-        
+
     candidates = ["\t", ",", ";", " "]
-    
+
     with open(filepath, "r", encoding="utf-8") as file:
         for line in file:
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-                
+
             counts = {sep: line.count(sep) for sep in candidates}
             best_separator = max(counts, key=counts.get)
-            
+
             return best_separator if counts[best_separator] > 0 else "\t"
-            
+
     return "\t"
 
 
@@ -142,19 +143,19 @@ def ler_cabecalho(filename):
         ['Tempo(s)\\tDensidade(cm^-3)']
     """
     filepath = os.path.join("data", f"{filename}.txt")
-    
+
     if not os.path.exists(filepath):
         return None
-        
+
     header_lines = []
-    
+
     with open(filepath, "r", encoding="utf-8-sig") as file:
         for line in file:
             if line.startswith("#"):
                 header_lines.append(line.replace("#", "").strip())
             else:
                 break
-                
+
     return header_lines
 
 
@@ -174,12 +175,12 @@ def versionador(filename):
     """
     folder = "data"
     filepath = os.path.join(folder, f"{filename}.txt")
-    
+
     if not os.path.exists(filepath):
         return filename
 
     counter = 1
     while os.path.exists(os.path.join(folder, f"{filename}_{counter}.txt")):
         counter += 1
-        
+
     return f"{filename}_{counter}"
