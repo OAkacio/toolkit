@@ -15,13 +15,13 @@ def basic(
     HaveBox=True,
     escala="linear",
     cor="black",
-    espessura=2.0,
+    espessura=2.5,
     fontetitulo=16,
     fonteeixos=12,
     estilo_linha="-",
-    alpha_linha=0.7,
+    alpha_linha=0.8,
     cor_grade="#E6E6E6",
-    largura_figura=10,
+    largura_figura=7,
     altura_figura=6,
     remover_bordas=False,
     marcador=None,
@@ -181,13 +181,13 @@ def multi(
     HaveBox=True,
     escala="linear",
     cor_estilo="random",
-    espessura=1.5,
+    espessura=2,
     fontetitulo=14,
     fonteeixos=12,
-    estilo_linha="-",
+    estilo_linha="cycle",
     alpha_linha=1.0,
     cor_grade="#E6E6E6",
-    largura_figura=8,
+    largura_figura=7,
     altura_figura=6,
     remover_bordas=False,
     marcador=None,
@@ -305,11 +305,18 @@ def multi(
         cores = ["black"] * n_curvas
     elif cor_estilo == "random":
         cmap = plt.get_cmap("tab10")
-        cores = [cmap(i / n_curvas) for i in range(n_curvas)]
+        cores = [cmap(i % 10) for i in range(n_curvas)]
     elif isinstance(cor_estilo, list):
         cores = cor_estilo
     else:
         cores = [cor_estilo] * n_curvas
+
+    if estilo_linha == "cycle":
+        lista_estilos = ["-", ":", "--", "-."]
+    elif isinstance(estilo_linha, list):
+        lista_estilos = estilo_linha
+    else:
+        lista_estilos = [estilo_linha]
 
     for i in range(n_curvas):
         label_curva = nomes_curvas[i] if nomes_curvas else f"Curva {i+1}"
@@ -318,7 +325,7 @@ def multi(
             list_vecy[i],
             color=cores[i % len(cores)],
             linewidth=espessura,
-            linestyle=estilo_linha,
+            linestyle=lista_estilos[i % len(lista_estilos)],
             alpha=alpha_linha,
             marker=marcador,
             label=label_curva,
@@ -378,122 +385,136 @@ def multi(
 
 
 def elipse(
-    X,
-    Y,
-    Z,
-    ponto_destaque=None,
-    niveis_elipse=None,
-    titulo=r"Mapa de $\chi^2$",
-    NOMEvecx=r"$\Omega_M$",
-    NOMEvecy=r"$\Omega_\Lambda$",
-    HaveGrid=True,
-    HaveBox=True,
-    escala="linear",
-    cmap="viridis_r",
-    fontetitulo=16,
-    fonteeixos=12,
-    cor_ponto="red",
-    marcador_ponto="*",
-    tamanho_ponto=100,
-    estilo_elipses=["--", "-.", ":"],
-    cores_elipses=["red", "green", "blue"],
-    largura_figura=10,
-    altura_figura=8,
-    remover_bordas=False,
-    mostrar_colorbar=True,
-    label_colorbar=r"$\chi^2$",
-    save=False,
-    dpi=600,
-    formato="png",
-    nome="ellipse_graph",
-    plot=True,
+    X,  # Matriz de coordenadas X (geralmente de um meshgrid)
+    Y,  # Matriz de coordenadas Y (geralmente de um meshgrid)
+    Z,  # Matriz de valores Z (superfície de chi-quadrado ou probabilidade)
+    pontos_linha_x=None,  # Array de coordenadas X para a linha extra
+    pontos_linha_y=None,  # Array de coordenadas Y para a linha extra
+    legenda_linha="Linha extra",  # Texto da legenda para a linha extra
+    espessura_linha=1.0,  # Espessura da linha extra
+    estilo_linha=":",  # Estilo da linha extra (nativamente: pontilhada)
+    cor_linha="black",  # Cor da linha extra (nativamente: preta)
+    ponto_destaque=None,  # Tupla (x, y) para marcar o melhor ajuste (best-fit)
+    niveis_elipse=None,  # Lista de floats com os valores de Z para desenhar as elipses
+    nomes_sigmas=None,  # Lista de strings para nomear cada nível (ex: ['68%', '95%'])
+    mostrar_sigma=True,  # Booleano: define se o nome do nível aparece escrito sobre a elipse
+    titulo=None,  # Título do gráfico (None para nativamente sem título)
+    NOMEvecx="EIXO X",  # Rótulo do eixo X
+    NOMEvecy="EIXO Y",  # Rótulo do eixo Y
+    HaveGrid=True,  # Booleano: ativa ou desativa a grade
+    HaveBox=True,  # Booleano: mantém ou remove a moldura (box)
+    frame_legenda=True,  # Booleano: ativa ou desativa a caixa em volta da legenda
+    framealpha=0.5,  # Transparencia da caixa em volta da legenda
+    tamanho_fonte_legenda=11, # Tamanho da fonte específica para a caixa de legenda
+    form="neither",  # Formato da colorbar ('max', 'min', 'both' ou 'neither')
+    escala="linear",  # Escala dos eixos X e Y ('linear' ou 'log')
+    escala_z="linear",  # Escala do mapa de calor Z ('linear' ou 'log')
+    num_ticks_colorbar=None, # Número máximo de valores mostrados na barra de cores (ex: 5)
+    cmap="viridis_r",  # Mapa de cores do fundo
+    fontetitulo=16,  # Tamanho da fonte do título
+    fonteeixos=14,  # Tamanho da fonte dos eixos e legendas
+    ponto_nome="Destaque",  # Texto da legenda para o destaque
+    cor_ponto="red",  # Cor do marcador de melhor ajuste
+    marcador_ponto="*",  # Estilo do marcador de melhor ajuste
+    tamanho_ponto=150,  # Tamanho do marcador de melhor ajuste
+    estilo_elipses=[
+        "-",
+        ":",
+        ":",
+    ],  # Estilo das linhas (nativamente: contínua na primeira, pontilhada nas outras)
+    cores_elipses=["red", "green", "blue"],  # Cores de cada nível de elipse
+    largura_figura=8,  # Largura da imagem em polegadas
+    altura_figura=6,  # Altura da imagem em polegadas
+    remover_bordas=False,  # Se True, remove as linhas superior e direita da moldura
+    mostrar_colorbar=True,  # Booleano: exibe ou oculta a barra de cores lateral
+    label_colorbar=r"$\chi^2$",  # Título da barra de cores
+    niveis_mapa_calor=200,  # Quantidade de níveis no contourf para garantir continuidade
+    save=False,  # Booleano: salva o arquivo se True
+    dpi=600,  # Resolução de saída para publicação
+    formato="pdf",  # Formato de salvamento (pdf é ideal para meio acadêmico)
+    nome="ellipse_graph",  # Nome do arquivo de saída
+    plot=True,  # Booleano: exibe o gráfico na tela
 ):
-    """
-    Gera um mapa de contornos para superfícies de erro, focado em elipses de confiança.
-
-    Esta função é especializada na visualização de espaços de parâmetros (como mapas
-    de $\chi^2$), utilizando preenchimentos degradês e sobreposição de contornos
-    específicos para representar níveis de significância estatística e o ponto
-    de melhor ajuste (best-fit).
-
-    Parâmetros
-    ----------
-    X, Y, Z : array-like
-        Matrizes de coordenadas (X, Y) e valores de superfície (Z). Geralmente
-        gerados via np.meshgrid.
-    ponto_destaque : tuple, opcional
-        Coordenadas (x, y) do ponto de interesse (ex: mínimo global).
-    niveis_elipse : list of float, opcional
-        Valores de Z onde as linhas de contorno (elipses) devem ser desenhadas.
-    titulo : str, opcional
-        Título do gráfico. Suporta sintaxe LaTeX.
-    NOMEvecx : str, opcional
-        Rótulo do eixo X. O padrão utiliza notação cosmológica ($\Omega_M$).
-    NOMEvecy : str, opcional
-        Rótulo do eixo Y. O padrão utiliza notação cosmológica ($\Omega_\Lambda$).
-    HaveGrid : bool, opcional
-        Se True, exibe uma grade sutil sobre o mapa de calor.
-    HaveBox : bool, opcional
-        Se False, remove a moldura externa do gráfico.
-    escala : str, opcional
-        Define o tipo de escala dos eixos ("linear", "log").
-    cmap : str, opcional
-        Mapa de cores para o preenchimento. O padrão é "viridis_r" (reverso).
-    fontetitulo : int, opcional
-        Tamanho da fonte para o título principal.
-    fonteeixos : int, opcional
-        Tamanho da fonte para rótulos e legendas.
-    cor_ponto : str, opcional
-        Cor do marcador de destaque.
-    marcador_ponto : str, opcional
-        Estilo do marcador para o ponto de destaque (ex: "*", "o").
-    tamanho_ponto : int, opcional
-        Área do marcador de destaque.
-    estilo_elipses : list of str, opcional
-        Lista de estilos de linha para cada nível de contorno.
-    cores_elipses : list of str, opcional
-        Lista de cores para cada nível de contorno.
-    largura_figura, altura_figura : int, opcional
-        Dimensões da figura em polegadas.
-    remover_bordas : bool, opcional
-        Se True, oculta as bordas superior e direita.
-    mostrar_colorbar : bool, opcional
-        Se True, adiciona uma barra de cores lateral para referência de Z.
-    label_colorbar : str, opcional
-        Título da barra de cores, suportando LaTeX.
-    save : bool, opcional
-        Se True, exporta a imagem para a pasta `figures/`.
-    dpi : int, opcional
-        Resolução da exportação. O padrão de 600 DPI garante qualidade de publicação.
-    formato : str, opcional
-        Extensão do arquivo (png, pdf, svg, etc).
-    nome : str, opcional
-        Nome base do arquivo salvo.
-    plot : bool, opcional
-        Se True, exibe a figura imediatamente.
-
-    Notas
-    -----
-    A função otimiza a legibilidade de dados estatísticos:
-    - Uso de LaTeX: Rótulos e títulos são formatados para aceitar notação
-      matemática complexa nativamente.
-    - Z-Order: O ponto de destaque é renderizado acima dos contornos (`zorder=5`)
-      para evitar obstruções.
-    - Colorbar: O ajuste de preenchimento (`pad=0.02`) garante que a barra
-      não ocupe espaço excessivo da área de plotagem.
-    """
     import os
+    import numpy as np
     from matplotlib import pyplot as plt
+    from matplotlib.colors import LogNorm
+    from matplotlib.ticker import LogFormatterMathtext, LogLocator, MaxNLocator
+
+    plt.rcParams.update(
+        {
+            "text.usetex": False,
+            "font.family": "serif",
+            "font.serif": ["Computer Modern Roman", "DejaVu Serif"],
+            "mathtext.fontset": "cm",
+            "xtick.direction": "in",
+            "ytick.direction": "in",
+            "xtick.top": True,
+            "ytick.right": True,
+            "axes.linewidth": 1.2,
+        }
+    )
 
     fig, ax = plt.subplots(figsize=(largura_figura, altura_figura))
-    cf = ax.contourf(X, Y, Z, levels=50, cmap=cmap, alpha=0.9)
+
+    # Configuração da escala Z (linear ou logarítmica)
+    if escala_z == "log":
+        Z_min_positivo = np.min(Z[Z > 0]) if np.any(Z > 0) else 1e-10
+        norm = LogNorm(vmin=Z_min_positivo, vmax=np.max(Z))
+        levels_cf = np.geomspace(Z_min_positivo, np.max(Z), niveis_mapa_calor)
+    else:
+        norm = None
+        levels_cf = niveis_mapa_calor
+
+    cf = ax.contourf(
+        X, Y, Z, 
+        levels=levels_cf, 
+        cmap=cmap, 
+        norm=norm, 
+        extend=form,
+        antialiased=False
+    )
+    
+    for c in cf.collections:
+        c.set_edgecolor("face")
+        c.set_linewidth(1e-9)
+
     if niveis_elipse is not None:
+        if nomes_sigmas is None:
+            nomes_sigmas = [rf"{i+1}$\sigma$" for i in range(len(niveis_elipse))]
+
         for i, nivel in enumerate(niveis_elipse):
             estilo = estilo_elipses[i % len(estilo_elipses)]
             cor = cores_elipses[i % len(cores_elipses)]
-            ax.contour(
-                X, Y, Z, levels=[nivel], colors=cor, linestyles=estilo, linewidths=1.5
+            nome_sigma = nomes_sigmas[i % len(nomes_sigmas)]
+
+            contorno = ax.contour(
+                X, Y, Z, levels=[nivel], colors=[cor], linestyles=estilo, linewidths=1.8
             )
+
+            if mostrar_sigma:
+                fmt = {nivel: nome_sigma}
+                textos_labels = ax.clabel(
+                    contorno,
+                    inline=True,
+                    fontsize=fonteeixos * 0.9,
+                    fmt=fmt,
+                    colors=[cor],
+                )
+                for texto in textos_labels:
+                    texto.set_fontweight("bold")
+
+    if pontos_linha_x is not None and pontos_linha_y is not None:
+        ax.plot(
+            pontos_linha_x,
+            pontos_linha_y,
+            color=cor_linha,
+            linestyle=estilo_linha,
+            linewidth=espessura_linha,
+            label=legenda_linha,
+            zorder=4,
+        )
+
     if ponto_destaque is not None:
         ax.scatter(
             ponto_destaque[0],
@@ -501,47 +522,73 @@ def elipse(
             color=cor_ponto,
             marker=marcador_ponto,
             s=tamanho_ponto,
-            label=f"Melhor ajuste\n({ponto_destaque[0]}, {ponto_destaque[1]})",
+            label=f"{ponto_nome}\n({ponto_destaque[0]:.3f}, {ponto_destaque[1]:.3f})",
             zorder=5,
         )
+
     if mostrar_colorbar:
         cbar = fig.colorbar(cf, ax=ax, pad=0.02)
         cbar.set_label(label_colorbar, fontsize=fonteeixos)
-    ax.set_title(
-        titulo, fontsize=fontetitulo, pad=20, fontweight="bold", color="#333333"
-    )
+        cbar.ax.tick_params(labelsize=fonteeixos * 0.8)
+        cbar.outline.set_linewidth(1.2)
+        
+        # Controle dos limites e labels da colorbar
+        if escala_z == "log":
+            cbar.ax.yaxis.set_major_formatter(LogFormatterMathtext())
+            if num_ticks_colorbar is not None:
+                cbar.ax.yaxis.set_major_locator(LogLocator(base=10.0, numticks=num_ticks_colorbar))
+            else:
+                cbar.ax.yaxis.set_minor_locator(LogLocator(base=10.0, subs=np.arange(2, 10) * 0.1))
+        else:
+            if num_ticks_colorbar is not None:
+                cbar.ax.yaxis.set_major_locator(MaxNLocator(num_ticks_colorbar))
+
+    if titulo:
+        ax.set_title(titulo, fontsize=fontetitulo, pad=15)
+
     ax.set_xlabel(NOMEvecx, fontsize=fonteeixos, labelpad=10)
     ax.set_ylabel(NOMEvecy, fontsize=fonteeixos, labelpad=10)
     ax.set_xscale(escala)
     ax.set_yscale(escala)
-    if ponto_destaque is not None:
+
+    ax.minorticks_on()
+    ax.tick_params(which="minor", direction="in", top=True, right=True)
+
+    if ponto_destaque is not None or (pontos_linha_x is not None and pontos_linha_y is not None):
         ax.legend(
-            frameon=True,
+            frameon=frame_legenda,
             facecolor="white",
-            framealpha=0.7,
-            edgecolor="#CCCCCC",
-            fontsize=fonteeixos * 0.8,
+            framealpha=framealpha,
+            edgecolor="#333333",
+            fontsize=tamanho_fonte_legenda,  # Passando o novo controle de fonte aqui
+            loc="best",
         )
+
     if HaveGrid:
-        ax.grid(True, linestyle="--", linewidth=0.5, color="#FFFFFF", alpha=0.3)
+        ax.grid(True, linestyle=":", linewidth=0.5, color="black", alpha=0.15)
         ax.set_axisbelow(False)
+
     if not HaveBox:
         ax.set_frame_on(False)
     elif remover_bordas:
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.spines["left"].set_color("#CCCCCC")
-        ax.spines["bottom"].set_color("#CCCCCC")
-    plt.tight_layout()
-    if save:
-        import os
 
+    # TRAVANDO OS LIMITES DO EIXO PARA REMOVER BORDAS BRANCAS
+    ax.set_xlim(np.min(X), np.max(X))
+    ax.set_ylim(np.min(Y), np.max(Y))
+
+    plt.tight_layout()
+
+    if save:
         if not os.path.exists("figures"):
             os.makedirs("figures")
         plt.savefig(f"figures/{nome}.{formato}", dpi=dpi, bbox_inches="tight")
+
     if plot:
         plt.show()
-    return None
+
+    return fig, ax
 
 
 def basicdot(
@@ -555,17 +602,18 @@ def basicdot(
     HaveBox=True,
     escala="linear",
     cor="black",
-    espessura=1.5,
-    fontetitulo=14,
+    espessura=2.0,
+    fontetitulo=16,
     fonteeixos=12,
     estilo_linha="-",
-    alpha_linha=1.0,
+    alpha_linha=0.7,
     cor_grade="#E6E6E6",
-    largura_figura=8,
+    largura_figura=7,
     altura_figura=6,
     remover_bordas=False,
     marcador=None,
     cor_ponto="red",
+    label_curva="Dados",
     marcador_ponto="*",
     tamanho_ponto=150,
     label_ponto="Destaque",
@@ -677,7 +725,7 @@ def basicdot(
         linestyle=estilo_linha,
         alpha=alpha_linha,
         marker=marcador,
-        label=titulo if titulo else "Dados",
+        label=label_curva if label_curva else "Dados",
     )
 
     if ponto_destaque is not None:

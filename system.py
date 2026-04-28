@@ -43,7 +43,6 @@ def header(titulo, largura=80, **kwargs):
     HL, VL = "═", "║"
     DIV_L, DIV_R = "╠", "╣"
     titulo_formatado = f" {titulo.upper()} "
-    print("\n" * 2)
     print(f"{GRAY}{TL}{HL * (largura - 2)}{TR}{RESET}")
     espaco_interno = largura - 2
     print(
@@ -225,3 +224,25 @@ def table(dados):
                 linha += f" {valor.ljust(larguras[c])} |"
         print(linha)
     print(separador_horizontal)
+
+
+def ok(lista, one=False):
+    if one:
+        BLUE = "\033[94m"
+        BOLD = "\033[1m"
+        RESET = "\033[0m"
+        CYAN = "\033[36m"
+        print(f"             {BLUE}{BOLD}»{RESET} {f"{CYAN}[OK]{RESET}   {lista}"}")
+        return
+    for item in lista:
+        BLUE = "\033[94m"
+        BOLD = "\033[1m"
+        RESET = "\033[0m"
+        CYAN = "\033[36m"
+        print(f"             {BLUE}{BOLD}»{RESET} {f"{CYAN}[OK]{RESET}   {item}"}")
+
+def fim():
+    CYAN = "\033[36m"
+    RESET = "\033[0m"
+    BLUE = "\033[94m"
+    print(f"\n     {BLUE}»»»»{CYAN} EXECUÇÃO FINALIZADA!{RESET}\n")
