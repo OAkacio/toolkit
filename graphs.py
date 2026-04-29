@@ -680,9 +680,7 @@ def basicstyle(
             "ytick.labelsize": axis_fontsize - 2,
         }
     )
-
     fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=100)
-
     ax.plot(
         x_data,
         y_data,
@@ -693,7 +691,6 @@ def basicstyle(
         marker=marker,
         label=curve_label if curve_label else "Dados",
     )
-
     if highlight_point is not None:
         ax.scatter(
             highlight_point[0],
@@ -704,27 +701,21 @@ def basicstyle(
             label=highlight_label,
             zorder=5,
         )
-
     if title:
         ax.set_title(title, fontsize=title_fontsize, pad=15, fontweight="bold")
-
     ax.set_xlabel(x_label, fontsize=axis_fontsize, labelpad=8)
     ax.set_ylabel(y_label, fontsize=axis_fontsize, labelpad=8)
     ax.set_xscale(axis_scale)
     ax.set_yscale(axis_scale)
-
     ax.xaxis.set_minor_locator(AutoMinorLocator())
     ax.yaxis.set_minor_locator(AutoMinorLocator())
     ax.tick_params(which="major", length=6, width=1.2)
     ax.tick_params(which="minor", length=3, width=1.0)
-
     if title or highlight_point:
         ax.legend(frameon=False, fontsize=axis_fontsize * 0.9)
-
     if show_grid:
         ax.grid(True, linestyle="--", linewidth=0.5, color=grid_color, alpha=0.7)
         ax.set_axisbelow(True)
-
     if not show_box:
         ax.set_frame_on(False)
     elif remove_borders:
@@ -734,18 +725,14 @@ def basicstyle(
         for spine in ax.spines.values():
             spine.set_visible(True)
             spine.set_color("black")
-
     plt.tight_layout()
-
     if save_fig:
         if not os.path.exists("figures"):
             os.makedirs("figures")
         filepath = f"figures/{filename}.{file_format}"
         plt.savefig(filepath, dpi=dpi, bbox_inches="tight", facecolor="white")
-
     if show_plot:
         plt.show()
     else:
         plt.close(fig)
-
     return None
