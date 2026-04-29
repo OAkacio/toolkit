@@ -140,7 +140,6 @@ def basic(
             os.makedirs("figures")
         filepath = f"figures/{filename}.{file_format}"
         plt.savefig(filepath, dpi=dpi, bbox_inches="tight", facecolor="white")
-        print(f"Gráfico salvo com sucesso em: {filepath}")
 
     if show_plot:
         plt.show()
@@ -592,7 +591,7 @@ def elipse(
     return fig, ax
 
 
-def basicdot(
+def basicstyle(
     x_data,
     y_data,
     highlight_point=None,
