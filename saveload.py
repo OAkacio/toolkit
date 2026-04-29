@@ -184,3 +184,21 @@ def versionador(filename):
         counter += 1
 
     return f"{filename}_{counter}"
+
+
+def havefile(caminho):
+    """
+    Verifica se um arquivo ou diretório existe no caminho especificado.
+
+    Args:
+        caminho (str): Caminho completo ou relativo para o arquivo ou diretório.
+
+    Returns:
+        bool: True se o caminho existir, False caso contrário.
+
+    Example:
+        >>> existe = sy.havefile("data/resultados_densidade.txt")
+        >>> if existe:
+        ...     print("O arquivo está disponível para leitura.")
+    """
+    return os.path.exists(caminho)
