@@ -591,10 +591,22 @@ def elipse(
     return fig, ax
 
 
+import os
+import matplotlib.pyplot as plt
+from matplotlib.ticker import AutoMinorLocator
+
+
 def basicstyle(
     x_data,
     y_data,
     highlight_point=None,
+    sigma_intervals=None,
+    sigma_colors=("#ccebc5", "#fff2ae", "#fbb4ae"),
+    sigma_line_colors=("forestgreen", "orange", "lightcoral"),
+    sigma_labels=("1σ (68.3%)", "2σ (95.4%)", "3σ (99.7%)"),
+    show_sigma_lines=True,
+    sigma_alpha=0.6,
+    show_legend_frame=True,
     title="",
     x_label="EIXO X",
     y_label="EIXO Y",
@@ -614,7 +626,7 @@ def basicstyle(
     marker=None,
     highlight_color="red",
     curve_label="Dados",
-    highlight_marker="*",
+    highlight_marker="o",
     highlight_size=150,
     highlight_label="Destaque",
     save_fig=False,
@@ -624,12 +636,20 @@ def basicstyle(
     show_plot=True,
 ):
     """
-    Gera um gráfico 2D focado em exibir uma curva em conjunto com a evidenciação de um ponto específico.
+    Gera um gráfico 2D focado em exibir uma curva em conjunto com a evidenciação de um ponto específico
+    e intervalos de confiança (sigmas).
 
     Args:
         x_data (array-like): Dados do eixo X.
         y_data (array-like): Dados do eixo Y.
         highlight_point (tuple, optional): Coordenadas (x, y) do ponto que receberá destaque. Default é None.
+        sigma_intervals (list of tuples, optional): Lista com limites (x_min, x_max) para os intervalos de erro. Default é None.
+        sigma_colors (tuple, optional): Cores de preenchimento para as regiões sigma.
+        sigma_line_colors (tuple, optional): Cores das linhas tracejadas das regiões sigma.
+        sigma_labels (tuple, optional): Rótulos das regiões sigma para a legenda.
+        show_sigma_lines (bool, optional): Exibe linhas tracejadas delimitando as regiões sigma. Default é True.
+        sigma_alpha (float, optional): Opacidade do preenchimento das regiões sigma. Default é 0.6.
+        show_legend_frame (bool, optional): Exibe a caixa ao redor da legenda. Default é True.
         title (str, optional): Título do gráfico. Default é "".
         x_label (str, optional): Rótulo do eixo X. Default é "EIXO X".
         y_label (str, optional): Rótulo do eixo Y. Default é "EIXO Y".
@@ -649,7 +669,7 @@ def basicstyle(
         marker (str, optional): Marcador de pontos na curva regular. Default é None.
         highlight_color (str, optional): Cor do marcador de destaque. Default é "red".
         curve_label (str, optional): Nome da curva na legenda. Default é "Dados".
-        highlight_marker (str, optional): Símbolo do marcador de destaque. Default é "*".
+        highlight_marker (str, optional): Símbolo do marcador de destaque. Default é "o".
         highlight_size (int, optional): Tamanho do marcador de destaque. Default é 150.
         highlight_label (str, optional): Nome do marcador de destaque na legenda. Default é "Destaque".
         save_fig (bool, optional): Salva a figura em arquivo. Default é False.
@@ -658,14 +678,12 @@ def basicstyle(
         filename (str, optional): Nome do arquivo. Default é "basicdot_graph".
         show_plot (bool, optional): Exibe o gráfico em tela. Default é True.
 
-    Returns:
-        None
-
     Example:
         >>> import numpy as np
-        >>> x = np.linspace(0, 10, 50)
-        >>> y = np.exp(-x)
-        >>> gp.basicdot(x, y, highlight_point=(0, 1), highlight_label="Ponto de Injeção")
+        >>> x = np.linspace(0, 1, 100)
+        >>> y = (x - 0.73)**2 * 1000 + 550
+        >>> intervals = [(0.70, 0.76), (0.68, 0.78), (0.66, 0.80)]
+        >>> basicstyle(x, y, highlight_point=(0.73, 550), sigma_intervals=intervals)
     """
     plt.rcParams.update(
         {
@@ -690,7 +708,24 @@ def basicstyle(
         alpha=alpha,
         marker=marker,
         label=curve_label if curve_label else "Dados",
+        zorder=3,
     )
+    if sigma_intervals is not None:
+        for i in range(len(sigma_intervals) - 1, -1, -1):
+            x_min, x_max = sigma_intervals[i]
+            s_color = sigma_colors[i] if i < len(sigma_colors) else "gray"
+            l_color = sigma_line_colors[i] if i < len(sigma_line_colors) else s_color
+            s_label = sigma_labels[i] if i < len(sigma_labels) else f"Região {i+1}"
+            ax.axvspan(
+                x_min, x_max, color=s_color, alpha=sigma_alpha, label=s_label, zorder=1
+            )
+            if show_sigma_lines:
+                ax.axvline(
+                    x_min, color=l_color, linestyle="--", linewidth=1.5, zorder=2
+                )
+                ax.axvline(
+                    x_max, color=l_color, linestyle="--", linewidth=1.5, zorder=2
+                )
     if highlight_point is not None:
         ax.scatter(
             highlight_point[0],
@@ -711,8 +746,8 @@ def basicstyle(
     ax.yaxis.set_minor_locator(AutoMinorLocator())
     ax.tick_params(which="major", length=6, width=1.2)
     ax.tick_params(which="minor", length=3, width=1.0)
-    if title or highlight_point:
-        ax.legend(frameon=False, fontsize=axis_fontsize * 0.9)
+    if title or highlight_point or sigma_intervals is not None:
+        ax.legend(frameon=show_legend_frame, fontsize=axis_fontsize * 0.9)
     if show_grid:
         ax.grid(True, linestyle="--", linewidth=0.5, color=grid_color, alpha=0.7)
         ax.set_axisbelow(True)
