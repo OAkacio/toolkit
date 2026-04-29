@@ -202,3 +202,18 @@ def havefile(caminho):
         ...     print("O arquivo está disponível para leitura.")
     """
     return os.path.exists(caminho)
+
+def createfile(caminho):
+    """
+    Cria um novo arquivo no caminho especificado.
+
+    Args:
+        caminho (str): Caminho completo ou relativo para o novo arquivo.
+
+    Returns:
+        None
+
+    Example:
+        >>> sy.createfile("data/novo_diretório")
+    """
+    os.mkdir(caminho)
