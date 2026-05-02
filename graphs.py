@@ -12,6 +12,7 @@ from matplotlib.ticker import (
     LogFormatterMathtext,
     LogLocator,
     MaxNLocator,
+    NullFormatter,
 )
 from matplotlib.colors import LogNorm
 
@@ -767,23 +768,6 @@ def basicstyle(
     return None
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-import os
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.ticker import AutoMinorLocator, LogLocator, NullFormatter
-
 def basicstylemulti_log(
     x_data,
     y_data,
@@ -821,8 +805,6 @@ def basicstylemulti_log(
     file_format="pdf",
     filename="basicmulti_log_graph",
     show_plot=True,
-    x_scale="log",
-    y_scale="log"
 ):
     """
     Gera um gráfico 2D em escala logarítmica (por padrão) focado em exibir MÚLTIPLAS curvas em conjunto,
@@ -865,8 +847,6 @@ def basicstylemulti_log(
         file_format (str, optional): Formato do arquivo gerado. Default é "pdf".
         filename (str, optional): Nome do arquivo. Default é "basicmulti_log_graph".
         show_plot (bool, optional): Exibe o gráfico em tela. Default é True.
-        x_scale (str, optional): Escala do eixo X ("linear" ou "log"). Default é "log".
-        y_scale (str, optional): Escala do eixo Y ("linear" ou "log"). Default é "log".
 
     Example:
         >>> import numpy as np
@@ -875,36 +855,37 @@ def basicstylemulti_log(
         >>> y2 = x**3
         >>> intervals = [(2, 3), (4, 5)]
         >>> basicstylemulti_log(
-        ...     x_data=[x, x], 
-        ...     y_data=[y1, y2], 
-        ...     curve_label=["Quadrática", "Cúbica"], 
+        ...     x_data=[x, x],
+        ...     y_data=[y1, y2],
+        ...     curve_label=["Quadrática", "Cúbica"],
         ...     color=["blue", "green"],
-        ...     highlight_point=(5, 125), 
+        ...     highlight_point=(5, 125),
         ...     sigma_intervals=intervals
         ... )
     """
-    # Preparar múltiplas curvas (padronizar entradas para listas de listas/arrays)
     if isinstance(y_data, np.ndarray) and y_data.ndim == 1:
         y_data_list = [y_data]
         x_data_list = [x_data]
-    elif isinstance(y_data, list) and not isinstance(y_data[0], (list, tuple, np.ndarray)):
+    elif isinstance(y_data, list) and not isinstance(
+        y_data[0], (list, tuple, np.ndarray)
+    ):
         y_data_list = [y_data]
         x_data_list = [x_data]
     else:
         y_data_list = y_data
         if isinstance(x_data, np.ndarray) and x_data.ndim == 1:
             x_data_list = [x_data] * len(y_data_list)
-        elif isinstance(x_data, list) and not isinstance(x_data[0], (list, tuple, np.ndarray)):
+        elif isinstance(x_data, list) and not isinstance(
+            x_data[0], (list, tuple, np.ndarray)
+        ):
             x_data_list = [x_data] * len(y_data_list)
         else:
             x_data_list = x_data
 
     n_curves = len(y_data_list)
 
-    # Função auxiliar para processar argumentos visuais e criar listas de tamanho 'n_curves'
     def process_param(param, n):
         if isinstance(param, (list, tuple)) and not isinstance(param, str):
-            # Se já for lista, ajusta o tamanho repetindo o último elemento se necessário
             return list(param) + [param[-1]] * max(0, n - len(param))
         return [param] * n
 
@@ -913,8 +894,7 @@ def basicstylemulti_log(
     linestyles = process_param(linestyle, n_curves)
     alphas = process_param(alpha, n_curves)
     markers = process_param(marker, n_curves)
-    
-    # Label inteligente: se a curva não for lista mas existirem múltiplas, insere número no final
+
     if not isinstance(curve_label, (list, tuple)) and n_curves > 1:
         curve_labels = [f"{curve_label} {i+1}" for i in range(n_curves)]
     else:
@@ -933,10 +913,7 @@ def basicstylemulti_log(
             "ytick.labelsize": axis_fontsize - 2,
         }
     )
-    
     fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=100)
-    
-    # Plotagem em loop (Sobreposição de curvas)
     for i in range(n_curves):
         ax.plot(
             x_data_list[i],
@@ -949,23 +926,22 @@ def basicstylemulti_log(
             label=curve_labels[i],
             zorder=3,
         )
-
-    # Regiões de sigma
     if sigma_intervals is not None:
         for i in range(len(sigma_intervals) - 1, -1, -1):
             x_min, x_max = sigma_intervals[i]
             s_color = sigma_colors[i] if i < len(sigma_colors) else "gray"
             l_color = sigma_line_colors[i] if i < len(sigma_line_colors) else s_color
             s_label = sigma_labels[i] if i < len(sigma_labels) else f"Região {i+1}"
-            
             ax.axvspan(
                 x_min, x_max, color=s_color, alpha=sigma_alpha, label=s_label, zorder=1
             )
             if show_sigma_lines:
-                ax.axvline(x_min, color=l_color, linestyle="--", linewidth=1.5, zorder=2)
-                ax.axvline(x_max, color=l_color, linestyle="--", linewidth=1.5, zorder=2)
-
-    # Highlight point
+                ax.axvline(
+                    x_min, color=l_color, linestyle="--", linewidth=1.5, zorder=2
+                )
+                ax.axvline(
+                    x_max, color=l_color, linestyle="--", linewidth=1.5, zorder=2
+                )
     if highlight_point is not None:
         ax.scatter(
             highlight_point[0],
@@ -976,44 +952,42 @@ def basicstylemulti_log(
             label=highlight_label,
             zorder=5,
         )
-
     if title:
         ax.set_title(title, fontsize=title_fontsize, pad=15, fontweight="bold")
-    
     ax.set_xlabel(x_label, fontsize=axis_fontsize, labelpad=8)
     ax.set_ylabel(y_label, fontsize=axis_fontsize, labelpad=8)
-    
-    # Definindo escalas logarítmicas ou lineares dinamicamente
-    ax.set_xscale(x_scale)
-    ax.set_yscale(y_scale)
-
-    # Configuração apropriada de Ticks menores para log e linear
-    if x_scale == 'log':
-        ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs=np.arange(2, 10) * 0.1, numticks=10))
-        ax.xaxis.set_minor_formatter(NullFormatter())
-    else:
-        ax.xaxis.set_minor_locator(AutoMinorLocator())
-
-    if y_scale == 'log':
-        ax.yaxis.set_minor_locator(LogLocator(base=10.0, subs=np.arange(2, 10) * 0.1, numticks=10))
-        ax.yaxis.set_minor_formatter(NullFormatter())
-    else:
-        ax.yaxis.set_minor_locator(AutoMinorLocator())
-
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.xaxis.set_minor_locator(
+        LogLocator(base=10.0, subs=np.arange(2, 10) * 0.1, numticks=10)
+    )
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.yaxis.set_minor_locator(
+        LogLocator(base=10.0, subs=np.arange(2, 10) * 0.1, numticks=10)
+    )
+    ax.yaxis.set_minor_formatter(NullFormatter())
     ax.tick_params(which="major", length=6, width=1.2)
     ax.tick_params(which="minor", length=3, width=1.0)
-    
-    # Legenda inteligente
     if title or highlight_point or sigma_intervals is not None or n_curves > 1:
         ax.legend(frameon=show_legend_frame, fontsize=axis_fontsize * 0.9)
-        
     if show_grid:
-        # Grade maior
-        ax.grid(True, which='major', linestyle="--", linewidth=0.6, color=grid_color, alpha=0.9)
-        # Grade menor opcional para logs (fica muito bonito)
-        ax.grid(True, which='minor', linestyle=":", linewidth=0.4, color=grid_color, alpha=0.5)
+        ax.grid(
+            True,
+            which="major",
+            linestyle="--",
+            linewidth=0.6,
+            color=grid_color,
+            alpha=0.9,
+        )
+        ax.grid(
+            True,
+            which="minor",
+            linestyle=":",
+            linewidth=0.4,
+            color=grid_color,
+            alpha=0.5,
+        )
         ax.set_axisbelow(True)
-        
     if not show_box:
         ax.set_frame_on(False)
     elif remove_borders:
@@ -1023,35 +997,14 @@ def basicstylemulti_log(
         for spine in ax.spines.values():
             spine.set_visible(True)
             spine.set_color("black")
-            
     plt.tight_layout()
-    
     if save_fig:
         if not os.path.exists("figures"):
             os.makedirs("figures")
         filepath = f"figures/{filename}.{file_format}"
         plt.savefig(filepath, dpi=dpi, bbox_inches="tight", facecolor="white")
-        
     if show_plot:
         plt.show()
     else:
         plt.close(fig)
-        
     return None
-if __name__ == "__main__":
-    # Testando com a mesma lógica do seu código para verificar sobreposição e eixo LOG
-    x_base = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-    y_base1 = (1, 3, 6, 10, 15, 21, 28, 36, 45, 55)
-    y_base2 = (2, 6, 12, 20, 30, 42, 56, 72, 90, 110) # Outra curva exemplo
-    
-    basicstylemulti_log(
-        x_data=[x_base, x_base],       # Passo listas ou tuplas com os N eixos x
-        y_data=[y_base1, y_base2],     # Passo listas ou tuplas com as N curvas y
-        color=["black", "blue"],       # Lista iterável de cores
-        linestyle=["-", "--"],         # Lista iterável de estilos
-        curve_label=["Dados 1", "Dados 2"], 
-        show_plot=True, 
-        x_scale="log", 
-        y_scale="log",
-        show_grid=True
-    )
