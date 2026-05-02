@@ -361,7 +361,7 @@ def elipse(
     fig_height=6,
     remove_borders=False,
     show_colorbar=True,
-    colorbar_label=r"$\chi^2$",
+    colorbar_label=rf"$\chi^2$",
     heatmap_levels=200,
     save_fig=False,
     dpi=600,
@@ -767,4 +767,291 @@ def basicstyle(
     return None
 
 
-basicstyle(show_plot=True, axis_scale="log", x_data=(1,2,3,4,5,6,7,8,9,10), y_data=(1,3,6,10,15,21,28,36,45,55))
+
+
+
+
+
+
+
+
+
+
+
+
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import AutoMinorLocator, LogLocator, NullFormatter
+
+def basicstylemulti_log(
+    x_data,
+    y_data,
+    highlight_point=None,
+    sigma_intervals=None,
+    sigma_colors=("#ccebc5", "#fff2ae", "#fbb4ae"),
+    sigma_line_colors=("forestgreen", "orange", "lightcoral"),
+    sigma_labels=("1σ (68.3%)", "2σ (95.4%)", "3σ (99.7%)"),
+    show_sigma_lines=True,
+    sigma_alpha=0.6,
+    show_legend_frame=True,
+    title="",
+    x_label="EIXO X",
+    y_label="EIXO Y",
+    show_grid=False,
+    show_box=True,
+    color="black",
+    linewidth=2.0,
+    title_fontsize=16,
+    axis_fontsize=12,
+    linestyle="-",
+    alpha=0.7,
+    grid_color="#E6E6E6",
+    fig_width=7,
+    fig_height=6,
+    remove_borders=False,
+    marker=None,
+    highlight_color="red",
+    curve_label="Dados",
+    highlight_marker="o",
+    highlight_size=150,
+    highlight_label="Destaque",
+    save_fig=False,
+    dpi=600,
+    file_format="pdf",
+    filename="basicmulti_log_graph",
+    show_plot=True,
+    x_scale="log",
+    y_scale="log"
+):
+    """
+    Gera um gráfico 2D em escala logarítmica (por padrão) focado em exibir MÚLTIPLAS curvas em conjunto,
+    com a evidenciação de um ponto específico e intervalos de confiança (sigmas).
+
+    Args:
+        x_data (array-like ou list de array-like): Dados do eixo X. Pode ser uma lista única ou lista de listas para N curvas.
+        y_data (array-like ou list de array-like): Dados do eixo Y. Pode ser uma lista única ou lista de listas para N curvas.
+        highlight_point (tuple, optional): Coordenadas (x, y) do ponto que receberá destaque. Default é None.
+        sigma_intervals (list of tuples, optional): Lista com limites (x_min, x_max) para os intervalos de erro. Default é None.
+        sigma_colors (tuple, optional): Cores de preenchimento para as regiões sigma.
+        sigma_line_colors (tuple, optional): Cores das linhas tracejadas das regiões sigma.
+        sigma_labels (tuple, optional): Rótulos das regiões sigma para a legenda.
+        show_sigma_lines (bool, optional): Exibe linhas tracejadas delimitando as regiões sigma. Default é True.
+        sigma_alpha (float, optional): Opacidade do preenchimento das regiões sigma. Default é 0.6.
+        show_legend_frame (bool, optional): Exibe a caixa ao redor da legenda. Default é True.
+        title (str, optional): Título do gráfico. Default é "".
+        x_label (str, optional): Rótulo do eixo X. Default é "EIXO X".
+        y_label (str, optional): Rótulo do eixo Y. Default é "EIXO Y".
+        show_grid (bool, optional): Ativa a grade do gráfico. Default é False.
+        show_box (bool, optional): Mantém a caixa ao redor do gráfico. Default é True.
+        color (str ou list, optional): Cor das curvas de dados. Aceita lista de cores para N curvas. Default é "black".
+        linewidth (float ou list, optional): Espessura das curvas. Default é 2.0.
+        title_fontsize (int, optional): Tamanho da fonte do título. Default é 16.
+        axis_fontsize (int, optional): Tamanho da fonte dos eixos. Default é 12.
+        linestyle (str ou list, optional): Estilo das linhas. Default é "-".
+        alpha (float ou list, optional): Opacidade das linhas. Default é 0.7.
+        grid_color (str, optional): Cor da grade. Default é "#E6E6E6".
+        fig_width (float, optional): Largura da figura. Default é 7.
+        fig_height (float, optional): Altura da figura. Default é 6.
+        remove_borders (bool, optional): Remove bordas superior e direita. Default é False.
+        marker (str ou list, optional): Marcador de pontos nas curvas regulares. Default é None.
+        highlight_color (str, optional): Cor do marcador de destaque. Default é "red".
+        curve_label (str ou list, optional): Nome das curvas na legenda. Default é "Dados".
+        highlight_marker (str, optional): Símbolo do marcador de destaque. Default é "o".
+        highlight_size (int, optional): Tamanho do marcador de destaque. Default é 150.
+        highlight_label (str, optional): Nome do marcador de destaque na legenda. Default é "Destaque".
+        save_fig (bool, optional): Salva a figura em arquivo. Default é False.
+        dpi (int, optional): Resolução de salvamento. Default é 600.
+        file_format (str, optional): Formato do arquivo gerado. Default é "pdf".
+        filename (str, optional): Nome do arquivo. Default é "basicmulti_log_graph".
+        show_plot (bool, optional): Exibe o gráfico em tela. Default é True.
+        x_scale (str, optional): Escala do eixo X ("linear" ou "log"). Default é "log".
+        y_scale (str, optional): Escala do eixo Y ("linear" ou "log"). Default é "log".
+
+    Example:
+        >>> import numpy as np
+        >>> x = np.linspace(1, 10, 100)
+        >>> y1 = x**2
+        >>> y2 = x**3
+        >>> intervals = [(2, 3), (4, 5)]
+        >>> basicstylemulti_log(
+        ...     x_data=[x, x], 
+        ...     y_data=[y1, y2], 
+        ...     curve_label=["Quadrática", "Cúbica"], 
+        ...     color=["blue", "green"],
+        ...     highlight_point=(5, 125), 
+        ...     sigma_intervals=intervals
+        ... )
+    """
+    # Preparar múltiplas curvas (padronizar entradas para listas de listas/arrays)
+    if isinstance(y_data, np.ndarray) and y_data.ndim == 1:
+        y_data_list = [y_data]
+        x_data_list = [x_data]
+    elif isinstance(y_data, list) and not isinstance(y_data[0], (list, tuple, np.ndarray)):
+        y_data_list = [y_data]
+        x_data_list = [x_data]
+    else:
+        y_data_list = y_data
+        if isinstance(x_data, np.ndarray) and x_data.ndim == 1:
+            x_data_list = [x_data] * len(y_data_list)
+        elif isinstance(x_data, list) and not isinstance(x_data[0], (list, tuple, np.ndarray)):
+            x_data_list = [x_data] * len(y_data_list)
+        else:
+            x_data_list = x_data
+
+    n_curves = len(y_data_list)
+
+    # Função auxiliar para processar argumentos visuais e criar listas de tamanho 'n_curves'
+    def process_param(param, n):
+        if isinstance(param, (list, tuple)) and not isinstance(param, str):
+            # Se já for lista, ajusta o tamanho repetindo o último elemento se necessário
+            return list(param) + [param[-1]] * max(0, n - len(param))
+        return [param] * n
+
+    colors = process_param(color, n_curves)
+    linewidths = process_param(linewidth, n_curves)
+    linestyles = process_param(linestyle, n_curves)
+    alphas = process_param(alpha, n_curves)
+    markers = process_param(marker, n_curves)
+    
+    # Label inteligente: se a curva não for lista mas existirem múltiplas, insere número no final
+    if not isinstance(curve_label, (list, tuple)) and n_curves > 1:
+        curve_labels = [f"{curve_label} {i+1}" for i in range(n_curves)]
+    else:
+        curve_labels = process_param(curve_label, n_curves)
+
+    plt.rcParams.update(
+        {
+            "font.family": "serif",
+            "mathtext.fontset": "dejavuserif",
+            "axes.linewidth": 1.2,
+            "xtick.direction": "in",
+            "ytick.direction": "in",
+            "xtick.top": True,
+            "ytick.right": True,
+            "xtick.labelsize": axis_fontsize - 2,
+            "ytick.labelsize": axis_fontsize - 2,
+        }
+    )
+    
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=100)
+    
+    # Plotagem em loop (Sobreposição de curvas)
+    for i in range(n_curves):
+        ax.plot(
+            x_data_list[i],
+            y_data_list[i],
+            color=colors[i],
+            linewidth=linewidths[i],
+            linestyle=linestyles[i],
+            alpha=alphas[i],
+            marker=markers[i],
+            label=curve_labels[i],
+            zorder=3,
+        )
+
+    # Regiões de sigma
+    if sigma_intervals is not None:
+        for i in range(len(sigma_intervals) - 1, -1, -1):
+            x_min, x_max = sigma_intervals[i]
+            s_color = sigma_colors[i] if i < len(sigma_colors) else "gray"
+            l_color = sigma_line_colors[i] if i < len(sigma_line_colors) else s_color
+            s_label = sigma_labels[i] if i < len(sigma_labels) else f"Região {i+1}"
+            
+            ax.axvspan(
+                x_min, x_max, color=s_color, alpha=sigma_alpha, label=s_label, zorder=1
+            )
+            if show_sigma_lines:
+                ax.axvline(x_min, color=l_color, linestyle="--", linewidth=1.5, zorder=2)
+                ax.axvline(x_max, color=l_color, linestyle="--", linewidth=1.5, zorder=2)
+
+    # Highlight point
+    if highlight_point is not None:
+        ax.scatter(
+            highlight_point[0],
+            highlight_point[1],
+            color=highlight_color,
+            marker=highlight_marker,
+            s=highlight_size,
+            label=highlight_label,
+            zorder=5,
+        )
+
+    if title:
+        ax.set_title(title, fontsize=title_fontsize, pad=15, fontweight="bold")
+    
+    ax.set_xlabel(x_label, fontsize=axis_fontsize, labelpad=8)
+    ax.set_ylabel(y_label, fontsize=axis_fontsize, labelpad=8)
+    
+    # Definindo escalas logarítmicas ou lineares dinamicamente
+    ax.set_xscale(x_scale)
+    ax.set_yscale(y_scale)
+
+    # Configuração apropriada de Ticks menores para log e linear
+    if x_scale == 'log':
+        ax.xaxis.set_minor_locator(LogLocator(base=10.0, subs=np.arange(2, 10) * 0.1, numticks=10))
+        ax.xaxis.set_minor_formatter(NullFormatter())
+    else:
+        ax.xaxis.set_minor_locator(AutoMinorLocator())
+
+    if y_scale == 'log':
+        ax.yaxis.set_minor_locator(LogLocator(base=10.0, subs=np.arange(2, 10) * 0.1, numticks=10))
+        ax.yaxis.set_minor_formatter(NullFormatter())
+    else:
+        ax.yaxis.set_minor_locator(AutoMinorLocator())
+
+    ax.tick_params(which="major", length=6, width=1.2)
+    ax.tick_params(which="minor", length=3, width=1.0)
+    
+    # Legenda inteligente
+    if title or highlight_point or sigma_intervals is not None or n_curves > 1:
+        ax.legend(frameon=show_legend_frame, fontsize=axis_fontsize * 0.9)
+        
+    if show_grid:
+        # Grade maior
+        ax.grid(True, which='major', linestyle="--", linewidth=0.6, color=grid_color, alpha=0.9)
+        # Grade menor opcional para logs (fica muito bonito)
+        ax.grid(True, which='minor', linestyle=":", linewidth=0.4, color=grid_color, alpha=0.5)
+        ax.set_axisbelow(True)
+        
+    if not show_box:
+        ax.set_frame_on(False)
+    elif remove_borders:
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+    else:
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color("black")
+            
+    plt.tight_layout()
+    
+    if save_fig:
+        if not os.path.exists("figures"):
+            os.makedirs("figures")
+        filepath = f"figures/{filename}.{file_format}"
+        plt.savefig(filepath, dpi=dpi, bbox_inches="tight", facecolor="white")
+        
+    if show_plot:
+        plt.show()
+    else:
+        plt.close(fig)
+        
+    return None
+if __name__ == "__main__":
+    # Testando com a mesma lógica do seu código para verificar sobreposição e eixo LOG
+    x_base = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+    y_base1 = (1, 3, 6, 10, 15, 21, 28, 36, 45, 55)
+    y_base2 = (2, 6, 12, 20, 30, 42, 56, 72, 90, 110) # Outra curva exemplo
+    
+    basicstylemulti_log(
+        x_data=[x_base, x_base],       # Passo listas ou tuplas com os N eixos x
+        y_data=[y_base1, y_base2],     # Passo listas ou tuplas com as N curvas y
+        color=["black", "blue"],       # Lista iterável de cores
+        linestyle=["-", "--"],         # Lista iterável de estilos
+        curve_label=["Dados 1", "Dados 2"], 
+        show_plot=True, 
+        x_scale="log", 
+        y_scale="log",
+        show_grid=True
+    )
