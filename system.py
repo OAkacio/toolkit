@@ -6,6 +6,16 @@
 
 import os
 
+BLUE = "\033[94m"
+CYAN = "\033[96m"
+GOLD = "\033[33m"
+GRAY = "\033[90m"
+RED = "\033[91m"
+BOLD = "\033[1m"
+DIM = "\033[2m"
+RESET = "\033[0m"
+LIGHTGREEN = "\033[92m"
+
 
 def header(title, width=80, **kwargs):
     """
@@ -22,11 +32,6 @@ def header(title, width=80, **kwargs):
     Example:
         >>> sy.header("Iniciando Simulação", width=60, autor="Victor", grid="1024x1024")
     """
-    CYAN = "\033[96m"
-    BOLD = "\033[1m"
-    GOLD = "\033[33m"
-    GRAY = "\033[90m"
-    RESET = "\033[0m"
 
     TL, TR = "╔", "╗"
     BL, BR = "╚", "╝"
@@ -66,9 +71,6 @@ def status(message):
     Example:
         >>> sy.status("Calculando distâncias cosmológicas...")
     """
-    BLUE = "\033[94m"
-    BOLD = "\033[1m"
-    RESET = "\033[0m"
 
     print(f"\n  {BLUE}{BOLD}»{RESET} {message}")
 
@@ -89,11 +91,6 @@ def param(*items, indent=6):
     """
     if not items:
         return
-
-    BOLD = "\033[1m"
-    CYAN = "\033[36m"
-    GRAY = "\033[90m"
-    RESET = "\033[0m"
 
     processed = []
     for item in items:
@@ -184,10 +181,6 @@ def table(*axes, mode="column", **kwargs):
         "+" + "+".join(["-" * (widths[c] + 2) for c in columns]) + "+"
     )
 
-    BOLD = "\033[1m"
-    RESET = "\033[0m"
-    CYAN = "\033[36m"
-
     print(horizontal_separator)
     header_str = "|"
     for c in columns:
@@ -222,12 +215,6 @@ def cin(message, expected_type="string"):
     Example:
         >>> limite_max = sy.cin("Insira o limite superior da integração", expected_type="float")
     """
-    GOLD = "\033[33m"
-    CYAN = "\033[36m"
-    GRAY = "\033[90m"
-    RED = "\033[91m"
-    BOLD = "\033[1m"
-    RESET = "\033[0m"
 
     question_mark = f"{GOLD}{BOLD}?{RESET}"
     error_mark = f"{RED}{BOLD}!{RESET}"
@@ -272,14 +259,9 @@ def ok(messages, is_ok=True):
         >>> sy.ok("Matriz de densidade carregada")
         >>> sy.ok(["Arquivo corrompido", "Dados em branco"], is_ok=False)
     """
-    BLUE = "\033[94m"
-    BOLD = "\033[1m"
-    RESET = "\033[0m"
-    CYAN = "\033[36m"
-    RED = "\033[31m"
 
     if is_ok:
-        status_tag = f"{CYAN}[OK]{RESET}"
+        status_tag = f"{LIGHTGREEN}[OK]{RESET}"
     else:
         status_tag = f"{RED}[NOK]{RESET}"
 
@@ -292,12 +274,12 @@ def ok(messages, is_ok=True):
         print(f"{prefix} {item}")
 
 
-def fim():
+def fim(message="EXECUÇÃO FINALIZADA!"):
     """
     Imprime uma mensagem visual de finalização de script no terminal.
 
     Args:
-        None
+        message (str): Mensagem a ser devolvida ao usuário indicando a finalização do script. Default é "EXECUÇÃO FINALIZADA!"
 
     Returns:
         None
@@ -305,11 +287,8 @@ def fim():
     Example:
         >>> sy.fim()
     """
-    CYAN = "\033[36m"
-    RESET = "\033[0m"
-    BLUE = "\033[94m"
-
-    print(f"\n     {BLUE}»»»»{CYAN} EXECUÇÃO FINALIZADA!{RESET}\n")
+    simb = "=" * 40
+    print(f"\n     {BLUE}{simb}{RESET} {message} {BLUE}{simb}{RESET}\n")
 
 
 def help(filepath):
@@ -325,15 +304,10 @@ def help(filepath):
     Example:
         >>> sy.help("data/instrucoes.txt")
     """
-    DARK_GRAY = "\033[90m"
-    DIM = "\033[2m"
-    RED = "\033[91m"
-    BOLD = "\033[1m"
-    RESET = "\033[0m"
 
     if not os.path.exists(filepath):
         print(
-            f"\n  {RED}{BOLD}!{RESET} {DARK_GRAY}Arquivo de ajuda '{filepath}' não encontrado.{RESET}"
+            f"\n  {RED}{BOLD}!{RESET} {GRAY}Arquivo de ajuda '{filepath}' não encontrado.{RESET}"
         )
         return
 
@@ -347,21 +321,16 @@ def help(filepath):
                 continue
 
             if line.startswith("+"):
-                print(f"  {DARK_GRAY}{line}{RESET}")
+                print(f"  {GRAY}{line}{RESET}")
             elif line.startswith("|"):
-                formatted_line = line.replace("|", f"{RESET}{DARK_GRAY}|{RESET}{DIM}")
+                formatted_line = line.replace("|", f"{RESET}{GRAY}|{RESET}{DIM}")
                 print(f"  {DIM}{formatted_line}{RESET}")
             else:
-                print(f"  {DARK_GRAY}{DIM}{line}{RESET}")
+                print(f"  {GRAY}{DIM}{line}{RESET}")
 
     print()
 
 
-def hidestatus(message, NSpaces=30):
-    DARK_GRAY = "\033[90m"
-    DIM = "\033[2m"
-    RED = "\033[91m"
-    BOLD = "\033[1m"
-    RESET = "\033[0m"
+def hidestatus(message, NSpaces=10):
     rec = " " * NSpaces
-    print(f"{rec}{DARK_GRAY}{DIM}{message}{RESET}")
+    print(f"{rec}{GRAY}{DIM}{message}{RESET}")
