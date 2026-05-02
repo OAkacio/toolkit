@@ -357,14 +357,11 @@ def help(filepath):
     print()
 
 
-def hidestatus(message, lighton=True, NSpaces=30):
+def hidestatus(message, NSpaces=30):
     DARK_GRAY = "\033[90m"
     DIM = "\033[2m"
     RED = "\033[91m"
     BOLD = "\033[1m"
     RESET = "\033[0m"
     rec = " " * NSpaces
-    if lighton:
-        print(f"{rec}{DIM}{message}{RESET}")
-    else:
-        print(f"{rec}{DARK_GRAY}{DIM}{message}{RESET}")
+    print(f"{rec}{DARK_GRAY}{DIM}{message}{RESET}")
