@@ -24,7 +24,6 @@ def basic(
     y_label="EIXO Y",
     show_grid=False,
     show_box=True,
-    axis_scale="linear",
     color="black",
     linewidth=2.5,
     title_fontsize=16,
@@ -53,7 +52,6 @@ def basic(
         y_label (str, optional): Rótulo do eixo Y. Default é "EIXO Y".
         show_grid (bool, optional): Ativa a grade no fundo do gráfico. Default é False.
         show_box (bool, optional): Mantém a caixa ao redor do gráfico. Default é True.
-        axis_scale (str, optional): Escala dos eixos ('linear', 'log'). Default é "linear".
         color (str, optional): Cor da linha. Default é "black".
         linewidth (float, optional): Espessura da linha. Default é 2.5.
         title_fontsize (int, optional): Tamanho da fonte do título. Default é 16.
@@ -112,8 +110,8 @@ def basic(
 
     ax.set_xlabel(x_label, fontsize=axis_fontsize, labelpad=8)
     ax.set_ylabel(y_label, fontsize=axis_fontsize, labelpad=8)
-    ax.set_xscale(axis_scale)
-    ax.set_yscale(axis_scale)
+    ax.set_xscale("linear")
+    ax.set_yscale("linear")
     ax.xaxis.set_minor_locator(AutoMinorLocator())
     ax.yaxis.set_minor_locator(AutoMinorLocator())
     ax.tick_params(which="major", length=6, width=1.2)
@@ -158,7 +156,6 @@ def multi(
     y_label="EIXO Y",
     show_grid=False,
     show_box=True,
-    axis_scale="linear",
     color_style="random",
     linewidth=2,
     title_fontsize=14,
@@ -191,7 +188,6 @@ def multi(
         y_label (str, optional): Rótulo do eixo Y. Default é "EIXO Y".
         show_grid (bool, optional): Ativa a grade no fundo. Default é False.
         show_box (bool, optional): Mantém a caixa ao redor do gráfico. Default é True.
-        axis_scale (str, optional): Escala dos eixos. Default é "linear".
         color_style (str ou list, optional): 'random', 'preto', ou lista de cores customizada. Default é "random".
         linewidth (float, optional): Espessura das linhas. Default é 2.
         title_fontsize (int, optional): Tamanho da fonte do título. Default é 14.
@@ -278,8 +274,8 @@ def multi(
 
     ax.set_xlabel(x_label, fontsize=axis_fontsize, labelpad=8)
     ax.set_ylabel(y_label, fontsize=axis_fontsize, labelpad=8)
-    ax.set_xscale(axis_scale)
-    ax.set_yscale(axis_scale)
+    ax.set_xscale("linear")
+    ax.set_yscale("linear")
 
     ax.xaxis.set_minor_locator(AutoMinorLocator())
     ax.yaxis.set_minor_locator(AutoMinorLocator())
@@ -612,7 +608,6 @@ def basicstyle(
     y_label="EIXO Y",
     show_grid=False,
     show_box=True,
-    axis_scale="linear",
     color="black",
     linewidth=2.0,
     title_fontsize=16,
@@ -655,7 +650,6 @@ def basicstyle(
         y_label (str, optional): Rótulo do eixo Y. Default é "EIXO Y".
         show_grid (bool, optional): Ativa a grade do gráfico. Default é False.
         show_box (bool, optional): Mantém a caixa ao redor do gráfico. Default é True.
-        axis_scale (str, optional): Escala para os eixos. Default é "linear".
         color (str, optional): Cor da curva de dados. Default é "black".
         linewidth (float, optional): Espessura da curva. Default é 2.0.
         title_fontsize (int, optional): Tamanho da fonte do título. Default é 16.
@@ -740,8 +734,8 @@ def basicstyle(
         ax.set_title(title, fontsize=title_fontsize, pad=15, fontweight="bold")
     ax.set_xlabel(x_label, fontsize=axis_fontsize, labelpad=8)
     ax.set_ylabel(y_label, fontsize=axis_fontsize, labelpad=8)
-    ax.set_xscale(axis_scale)
-    ax.set_yscale(axis_scale)
+    ax.set_xscale("linear")
+    ax.set_yscale("linear")
     ax.xaxis.set_minor_locator(AutoMinorLocator())
     ax.yaxis.set_minor_locator(AutoMinorLocator())
     ax.tick_params(which="major", length=6, width=1.2)
@@ -771,3 +765,6 @@ def basicstyle(
     else:
         plt.close(fig)
     return None
+
+
+basicstyle(show_plot=True, axis_scale="log", x_data=(1,2,3,4,5,6,7,8,9,10), y_data=(1,3,6,10,15,21,28,36,45,55))
