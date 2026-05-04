@@ -2,14 +2,21 @@
 # * =============================================================================
 # * SAVE LOAD
 # * =============================================================================
-#
 
+# ? --- Bibiliotecas do Projeto ---
 import os
 
 
-def savetable(filename, data_matrix, is_vertical=True, header=None, separator="\t"):
+def savetable(
+    filename,
+    data_matrix,
+    is_vertical=True,
+    header=None,
+    separator="\t",
+    directory="data",
+):
     """
-    Salva uma matriz de dados em um arquivo de texto dentro do diretório 'data/'.
+    Salva uma matriz de dados em um arquivo de texto dentro do diretório especificado.
 
     Args:
         filename (str): Nome do arquivo a ser salvo (sem a extensão .txt).
@@ -17,33 +24,28 @@ def savetable(filename, data_matrix, is_vertical=True, header=None, separator="\
         is_vertical (bool, optional): Se True, transpõe a matriz antes de salvar (salva em colunas). Default é True.
         header (str ou list, optional): Cabeçalho a ser inserido no topo do arquivo. Default é None.
         separator (str, optional): Caractere separador entre os dados. Default é "\\t" (tabulação).
+        directory (str, optional): Diretório onde o arquivo será salvo. Default é "data".
 
     Returns:
         None
 
-    Example:
+    Exemplo:
         >>> tempos = [0.1, 0.2, 0.3]
         >>> densidades = [1e4, 1.2e4, 1.5e4]
         >>> sy.savetable("resultados_densidade", [tempos, densidades], header="Tempo(s)\\tDensidade(cm^-3)")
     """
-    folder = "data"
+    folder = directory
     if not os.path.exists(folder):
         os.makedirs(folder)
-
     filepath = os.path.join(folder, f"{filename}.txt")
-
-    # Se for uma lista 1D, é envolvida em outra lista para garantir formato de matriz 2D
     if data_matrix and not isinstance(data_matrix[0], (list, tuple)):
         data_matrix = [data_matrix]
-
     data_to_save = zip(*data_matrix) if is_vertical else data_matrix
-
     with open(filepath, "w", encoding="utf-8") as file:
         if header:
             header_lines = header.split("\n") if isinstance(header, str) else header
             for h_line in header_lines:
                 file.write(f"# {h_line}\n")
-
         for row in data_to_save:
             row_string = separator.join(map(str, row))
             file.write(row_string + "\n")
@@ -61,7 +63,7 @@ def loadtable(filepath, is_vertical=True, separator="\t"):
     Returns:
         list: Matriz contendo os dados lidos. Retorna None se o arquivo não for encontrado.
 
-    Example:
+    Exemplo:
         >>> dados = sy.loadtable("data/resultados_densidade.txt")
         >>> tempos = dados[0]
         >>> densidades = dados[1]
@@ -69,14 +71,12 @@ def loadtable(filepath, is_vertical=True, separator="\t"):
     if not os.path.exists(filepath):
         print(f"Arquivo não encontrado: {filepath}")
         return None
-
     read_matrix = []
     with open(filepath, "r", encoding="utf-8-sig") as file:
         for line in file:
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-
             values = []
             for item in line.split(separator):
                 item = item.strip()
@@ -84,12 +84,9 @@ def loadtable(filepath, is_vertical=True, separator="\t"):
                     values.append(float(item))
                 except ValueError:
                     values.append(item)
-
             read_matrix.append(values)
-
     if is_vertical and read_matrix:
         read_matrix = [list(column) for column in zip(*read_matrix)]
-
     return read_matrix
 
 
@@ -103,117 +100,78 @@ def identificadora(filepath):
     Returns:
         str: O separador identificado ("\\t", ",", ";" ou " "). Retorna "\\t" como fallback.
 
-    Example:
+    Exemplo:
         >>> sep_correto = sy.identificadora("data/meus_dados.csv")
         >>> print(repr(sep_correto))
         ','
     """
     if not os.path.exists(filepath):
         return None
-
     candidates = ["\t", ",", ";", " "]
-
     with open(filepath, "r", encoding="utf-8") as file:
         for line in file:
             line = line.strip()
             if not line or line.startswith("#"):
                 continue
-
             counts = {sep: line.count(sep) for sep in candidates}
             best_separator = max(counts, key=counts.get)
-
             return best_separator if counts[best_separator] > 0 else "\t"
-
     return "\t"
 
 
-def ler_cabecalho(filename):
+def ler_cabecalho(filepath):
     """
     Lê exclusivamente o cabeçalho (linhas iniciadas por '#') de um arquivo no diretório 'data/'.
-
     Args:
-        filename (str): Nome do arquivo (sem extensão).
-
+        filepath (str): Caminho completo do arquivo a ser analisado.
     Returns:
         list: Lista de strings contendo as linhas do cabeçalho. Retorna None se não encontrar o arquivo.
-
-    Example:
-        >>> headers = sy.ler_cabecalho("resultados_densidade")
+    Exemplo:
+        >>> headers = sy.ler_cabecalho("dados/resultados_densidade.txt")
         >>> print(headers)
         ['Tempo(s)\\tDensidade(cm^-3)']
     """
-    filepath = os.path.join("data", f"{filename}.txt")
-
     if not os.path.exists(filepath):
         return None
-
     header_lines = []
-
     with open(filepath, "r", encoding="utf-8-sig") as file:
         for line in file:
             if line.startswith("#"):
                 header_lines.append(line.replace("#", "").strip())
             else:
                 break
-
     return header_lines
 
 
-def versionador(filename):
-    """
-    Verifica se um arquivo já existe no diretório 'data/' e retorna um nome com sufixo numérico para evitar sobrescrita.
-
-    Args:
-        filename (str): Nome base do arquivo que se deseja salvar.
-
-    Returns:
-        str: Nome do arquivo original ou acrescido de um sufixo numérico (ex: 'nome_1', 'nome_2').
-
-    Example:
-        >>> novo_nome = sy.versionador("tabela_vento")
-        >>> sy.savetable(novo_nome, dados)
-    """
-    folder = "data"
-    filepath = os.path.join(folder, f"{filename}.txt")
-
-    if not os.path.exists(filepath):
-        return filename
-
-    counter = 1
-    while os.path.exists(os.path.join(folder, f"{filename}_{counter}.txt")):
-        counter += 1
-
-    return f"{filename}_{counter}"
-
-
-def havefile(caminho):
+def havefile(filepath):
     """
     Verifica se um arquivo ou diretório existe no caminho especificado.
 
     Args:
-        caminho (str): Caminho completo ou relativo para o arquivo ou diretório.
+        filepath (str): Caminho completo para o arquivo ou diretório.
 
     Returns:
         bool: True se o caminho existir, False caso contrário.
 
-    Example:
+    Exemplo:
         >>> existe = sy.havefile("data/resultados_densidade.txt")
         >>> if existe:
         ...     print("O arquivo está disponível para leitura.")
     """
-    return os.path.exists(caminho)
+    return os.path.exists(filepath)
 
-def createfile(caminho):
+
+def createfile(filepath):
     """
-    Cria um novo arquivo no caminho especificado.
+    Cria um novo arquivo no caminho completo especificado.
 
     Args:
-        caminho (str): Caminho completo ou relativo para o novo arquivo.
+        filepath (str): Caminho completo para o novo arquivo.
 
     Returns:
         None
 
-    Example:
+    Exemplo:
         >>> sy.createfile("data/novo_diretório")
     """
-    os.mkdir(caminho)
+    os.mkdir(filepath)
