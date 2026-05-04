@@ -27,6 +27,10 @@ git submodule add https://github.com/OAkacio/Pytool.git
 
 O código foi projetado para atuar como uma biblioteca utilitária em seus scripts principais. Você pode importar os módulos de gráficos e de sistema de forma independente para estilizar seus dados e o fluxo de execução.
 
+
+![ExemploSystem](examples/ex1.png)
+
+
 ## Motivação
 
 Este repositório foi consolidado para agilizar o desenvolvimento de projetos acadêmicos e científicos. Ao centralizar e automatizar rotinas visuais repetitivas, o foco é transferido da formatação manual (especialmente para a adequação de relatórios em LaTeX e documentação científica) para a física e a qualidade do código propriamente ditos, reforçando as práticas de _Open Science_.
