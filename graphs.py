@@ -2,8 +2,8 @@
 # * =============================================================================
 # * GRAPHS
 # * =============================================================================
-#
 
+# ? --- Bibiliotecas do Projeto ---
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -43,7 +43,7 @@ def basic(
     show_plot=True,
 ):
     """
-    Gera um gráfico 2D simples de uma única curva.
+    Gera um gráfico 2D simples de uma única curva com pré-definições de estilo focadas na formalidade científica. A função permite a personalização completa.
 
     Args:
         x_data (array-like): Dados do eixo X.
@@ -93,7 +93,6 @@ def basic(
             "legend.frameon": False,
         }
     )
-
     fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=100)
     ax.plot(
         x_data,
@@ -105,10 +104,8 @@ def basic(
         marker=marker,
         label=title if title else None,
     )
-
     if title:
         ax.set_title(title, fontsize=title_fontsize, pad=15, fontweight="bold")
-
     ax.set_xlabel(x_label, fontsize=axis_fontsize, labelpad=8)
     ax.set_ylabel(y_label, fontsize=axis_fontsize, labelpad=8)
     ax.set_xscale("linear")
@@ -117,11 +114,9 @@ def basic(
     ax.yaxis.set_minor_locator(AutoMinorLocator())
     ax.tick_params(which="major", length=6, width=1.2)
     ax.tick_params(which="minor", length=3, width=1.0)
-
     if show_grid:
         ax.grid(True, linestyle="--", linewidth=0.5, color=grid_color, alpha=0.7)
         ax.set_axisbelow(True)
-
     if not show_box:
         ax.set_frame_on(False)
     elif remove_borders:
@@ -131,20 +126,16 @@ def basic(
         for spine in ax.spines.values():
             spine.set_visible(True)
             spine.set_color("black")
-
     plt.tight_layout()
-
     if save_fig:
         if not os.path.exists("figures"):
             os.makedirs("figures")
         filepath = f"figures/{filename}.{file_format}"
         plt.savefig(filepath, dpi=dpi, bbox_inches="tight", facecolor="white")
-
     if show_plot:
         plt.show()
     else:
         plt.close(fig)
-
     return None
 
 
@@ -178,7 +169,7 @@ def multi(
     show_plot=True,
 ):
     """
-    Gera um gráfico 2D contendo múltiplas curvas sobrepostas.
+    Gera um gráfico 2D com "N" curvas sobrepostas com pré-definições de estilo focadas na formalidade científica. A função permite a personalização completa.
 
     Args:
         x_list (list de arrays): Lista contendo os arrays do eixo X para cada curva.
@@ -231,15 +222,12 @@ def multi(
             "ytick.labelsize": axis_fontsize - 2,
         }
     )
-
     if len(x_list) != len(y_list):
         raise ValueError(
             "O número de listas em X deve ser igual ao número de listas em Y."
         )
-
     fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=100)
     num_curves = len(x_list)
-
     if color_style == "preto":
         colors = ["black"] * num_curves
     elif color_style == "random":
@@ -249,14 +237,12 @@ def multi(
         colors = color_style
     else:
         colors = [color_style] * num_curves
-
     if linestyle == "cycle":
         styles_list = ["-", ":", "--", "-."]
     elif isinstance(linestyle, list):
         styles_list = linestyle
     else:
         styles_list = [linestyle]
-
     for i in range(num_curves):
         curve_label = curve_names[i] if curve_names else f"Curva {i+1}"
         ax.plot(
@@ -269,20 +255,16 @@ def multi(
             marker=marker,
             label=curve_label,
         )
-
     if title:
         ax.set_title(title, fontsize=title_fontsize, pad=15, fontweight="bold")
-
     ax.set_xlabel(x_label, fontsize=axis_fontsize, labelpad=8)
     ax.set_ylabel(y_label, fontsize=axis_fontsize, labelpad=8)
     ax.set_xscale("linear")
     ax.set_yscale("linear")
-
     ax.xaxis.set_minor_locator(AutoMinorLocator())
     ax.yaxis.set_minor_locator(AutoMinorLocator())
     ax.tick_params(which="major", length=6, width=1.2)
     ax.tick_params(which="minor", length=3, width=1.0)
-
     if show_legend:
         ax.legend(
             title=legend_title,
@@ -292,11 +274,9 @@ def multi(
             loc="best",
             edgecolor="black" if legend_box else None,
         )
-
     if show_grid:
         ax.grid(True, linestyle="--", linewidth=0.5, color=grid_color, alpha=0.7)
         ax.set_axisbelow(True)
-
     if not show_box:
         ax.set_frame_on(False)
     elif remove_borders:
@@ -306,20 +286,16 @@ def multi(
         for spine in ax.spines.values():
             spine.set_visible(True)
             spine.set_color("black")
-
     plt.tight_layout()
-
     if save_fig:
         if not os.path.exists("figures"):
             os.makedirs("figures")
         filepath = f"figures/{filename}.{file_format}"
         plt.savefig(filepath, dpi=dpi, bbox_inches="tight", facecolor="white")
-
     if show_plot:
         plt.show()
     else:
         plt.close(fig)
-
     return None
 
 
@@ -371,7 +347,7 @@ def elipse(
     show_plot=True,
 ):
     """
-    Gera um mapa de contorno (heat map) frequentemente usado para visualização de chi-quadrado e intervalos de confiança.
+    Gera um mapa de calor (heat map) frequentemente usado para visualização de chi-quadrado e intervalos de confiança.
 
     Args:
         x_data (array-like): Matriz de coordenadas X (geralmente gerada por meshgrid).
@@ -442,9 +418,7 @@ def elipse(
             "axes.linewidth": 1.2,
         }
     )
-
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-
     if z_scale == "log":
         Z_min_positive = np.min(z_data[z_data > 0]) if np.any(z_data > 0) else 1e-10
         norm = LogNorm(vmin=Z_min_positive, vmax=np.max(z_data))
@@ -452,7 +426,6 @@ def elipse(
     else:
         norm = None
         levels_cf = heatmap_levels
-
     cf = ax.contourf(
         x_data,
         y_data,
@@ -464,16 +437,13 @@ def elipse(
         antialiased=True,
         rasterized=True,
     )
-
     if ellipse_levels is not None:
         if sigma_names is None:
             sigma_names = [rf"{i+1}$\sigma$" for i in range(len(ellipse_levels))]
-
         for i, level in enumerate(ellipse_levels):
             style = ellipse_styles[i % len(ellipse_styles)]
             color = ellipse_colors[i % len(ellipse_colors)]
             sigma_name = sigma_names[i % len(sigma_names)]
-
             contour = ax.contour(
                 x_data,
                 y_data,
@@ -483,7 +453,6 @@ def elipse(
                 linestyles=style,
                 linewidths=1.8,
             )
-
             if show_sigma:
                 fmt = {level: sigma_name}
                 labels_text = ax.clabel(
@@ -495,7 +464,6 @@ def elipse(
                 )
                 for text in labels_text:
                     text.set_fontweight("bold")
-
     if extra_line_x is not None and extra_line_y is not None:
         ax.plot(
             extra_line_x,
@@ -506,7 +474,6 @@ def elipse(
             label=extra_line_label,
             zorder=4,
         )
-
     if highlight_point is not None:
         ax.scatter(
             highlight_point[0],
@@ -517,13 +484,11 @@ def elipse(
             label=f"{highlight_label}\n({highlight_point[0]:.3f}, {highlight_point[1]:.3f})",
             zorder=5,
         )
-
     if show_colorbar:
         cbar = fig.colorbar(cf, ax=ax, pad=0.02)
         cbar.set_label(colorbar_label, fontsize=axis_fontsize)
         cbar.ax.tick_params(labelsize=axis_fontsize * 0.8)
         cbar.outline.set_linewidth(1.2)
-
         if z_scale == "log":
             cbar.ax.yaxis.set_major_formatter(LogFormatterMathtext())
             if colorbar_ticks is not None:
@@ -537,18 +502,14 @@ def elipse(
         else:
             if colorbar_ticks is not None:
                 cbar.ax.yaxis.set_major_locator(MaxNLocator(colorbar_ticks))
-
     if title:
         ax.set_title(title, fontsize=title_fontsize, pad=15)
-
     ax.set_xlabel(x_label, fontsize=axis_fontsize, labelpad=10)
     ax.set_ylabel(y_label, fontsize=axis_fontsize, labelpad=10)
     ax.set_xscale(axis_scale)
     ax.set_yscale(axis_scale)
-
     ax.minorticks_on()
     ax.tick_params(which="minor", direction="in", top=True, right=True)
-
     if highlight_point is not None or (
         extra_line_x is not None and extra_line_y is not None
     ):
@@ -560,37 +521,25 @@ def elipse(
             fontsize=legend_fontsize,
             loc="best",
         )
-
     if show_grid:
         ax.grid(True, linestyle=":", linewidth=0.5, color="black", alpha=0.15)
         ax.set_axisbelow(False)
-
     if not show_box:
         ax.set_frame_on(False)
     elif remove_borders:
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-
     ax.set_xlim(np.min(x_data), np.max(x_data))
     ax.set_ylim(np.min(y_data), np.max(y_data))
-
     plt.tight_layout()
-
     if save_fig:
         if not os.path.exists("figures"):
             os.makedirs("figures")
         filepath = f"figures/{filename}.{file_format}"
         plt.savefig(filepath, dpi=dpi, bbox_inches="tight")
-
     if show_plot:
         plt.show()
-
     return fig, ax
-
-
-import os
-import matplotlib.pyplot as plt
-from matplotlib.ticker import AutoMinorLocator
 
 
 def basicstyle(
@@ -633,7 +582,7 @@ def basicstyle(
 ):
     """
     Gera um gráfico 2D focado em exibir uma curva em conjunto com a evidenciação de um ponto específico
-    e intervalos de confiança (sigmas).
+    e intervalos de confiança (sigmas). Possui pré-definições de estilo focadas na formalidade científica. A função permite a personalização completa.
 
     Args:
         x_data (array-like): Dados do eixo X.
@@ -807,8 +756,8 @@ def basicstylemulti_log(
     show_plot=True,
 ):
     """
-    Gera um gráfico 2D em escala logarítmica (por padrão) focado em exibir MÚLTIPLAS curvas em conjunto,
-    com a evidenciação de um ponto específico e intervalos de confiança (sigmas).
+    Gera um gráfico 2D em escala logarítmica focado em exibir múltiplas curvas em conjunto,
+    com a evidenciação de um ponto específico e intervalos de confiança (sigmas). Possui pré definições de estilo para a formalidade científica.
 
     Args:
         x_data (array-like ou list de array-like): Dados do eixo X. Pode ser uma lista única ou lista de listas para N curvas.
@@ -881,7 +830,6 @@ def basicstylemulti_log(
             x_data_list = [x_data] * len(y_data_list)
         else:
             x_data_list = x_data
-
     n_curves = len(y_data_list)
 
     def process_param(param, n):
@@ -894,12 +842,10 @@ def basicstylemulti_log(
     linestyles = process_param(linestyle, n_curves)
     alphas = process_param(alpha, n_curves)
     markers = process_param(marker, n_curves)
-
     if not isinstance(curve_label, (list, tuple)) and n_curves > 1:
         curve_labels = [f"{curve_label} {i+1}" for i in range(n_curves)]
     else:
         curve_labels = process_param(curve_label, n_curves)
-
     plt.rcParams.update(
         {
             "font.family": "serif",
