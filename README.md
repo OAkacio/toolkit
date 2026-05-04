@@ -20,8 +20,8 @@ ORCID: [0009-0007-4484-2129](https://orcid.org/0009-0007-4484-2129)
 Clone este repositório e instale as dependências executando os seguintes comandos no seu terminal:
 
 ```bash
-git clone [https://github.com/OAkacio/toolkit.git](https://github.com/OAkacio/toolkit.git)
-cd toolkit
+git clone [https://github.com/OAkacio/Pytool.git](https://github.com/OAkacio/Pytool.git)
+cd Pytool
 pip install -r requirements.txt
 ```
 
@@ -32,7 +32,7 @@ O código foi projetado para atuar como uma biblioteca utilitária em seus scrip
 **1. Gráficos de Linha Simples e Destacados:** Para gerar visualizações limpas e minimalistas com a função `basic`, ou destacar pontos críticos (como máximos ou mínimos) utilizando a função `basicdot`, importe o módulo de gráficos:
 
 ```python
-from toolkit import graphs
+from Pytool import graphs
 
 graphs.basic(vecx, vecy, titulo="Evolução Temporal", save=True, nome="plot_basico")
 graphs.basicdot(vecx, vecy, ponto_destaque=(x0, y0), label_ponto="Máximo Local")
@@ -53,7 +53,7 @@ graphs.elipse(X, Y, Z, ponto_destaque=(best_m, best_l), niveis_elipse=[1.0, 2.0]
 **4. Estilização de Logs de Execução:** Para separar visualmente etapas de simulação no terminal, utilize os cabeçalhos em estilo *double-line* e os indicadores de status do módulo de sistema:
 
 ```python
-from toolkit import system
+from Pytool import system
 
 system.header("Início da Simulação Numérica", versao="1.0", regime="MHD")
 system.status("Calculando integração de malha...")
@@ -82,7 +82,7 @@ A construção dos utilitários apoia-se na abstração de rotinas comuns de for
 
 ```bash
 ├── figures/               # Diretório (gerado automaticamente) para gráficos de saída (.png, .pdf)
-├── toolkit/               # Módulo principal de ferramentas
+├── Pytool/               # Módulo principal de ferramentas
 │   ├── __pycache__/       # Arquivos compilados do Python
 │   ├── graphs.py          # Utilitários de plotagem baseados no Matplotlib
 │   └── system.py          # Utilitários de estilização e log de terminal (ANSI)
