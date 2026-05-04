@@ -1,4 +1,4 @@
-# **PYTOOL** _- Ferramentas para Estilo e Padronização_
+# **PYTOOLS** _- Ferramentas para Estilo e Padronização_
 
 ![Python Version](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -20,7 +20,7 @@ ORCID: [0009-0007-4484-2129](https://orcid.org/0009-0007-4484-2129)
 Adicione esta pasta em forma de submódulo no seu repositório para conseguir chama-lá de qualquer arquivo. Você pode adicionar na rai do seu repositório pelo terminal com:
 
 ```bash
-git submodule add https://github.com/OAkacio/Pytool.git
+git submodule add https://github.com/OAkacio/pytools.git
 ```
 
 ## Uso
