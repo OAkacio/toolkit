@@ -2,10 +2,11 @@
 # * =============================================================================
 # * SYSTEM
 # * =============================================================================
-#
 
+# ? --- Bibiliotecas do Projeto ---
 import os
 
+# ? --- Configurações de Cores ---
 BLUE = "\033[94m"
 CYAN = "\033[96m"
 GOLD = "\033[33m"
@@ -19,48 +20,44 @@ LIGHTGREEN = "\033[92m"
 
 def header(title, width=80, **kwargs):
     """
-    Gera um cabeçalho visual com bordas duplas, cores e metadados no terminal.
+    Gera um cabeçalho para início de código apresentando um título principal e um conjunto de "N" informações adicionais no formato de "CHAVE 1: VALOR 1 | CHAVE 2: VALOR 2 | ...".
 
     Args:
         title (str): O texto principal a ser exibido no centro do cabeçalho.
-        width (int, optional): A largura total da moldura em caracteres. Default é 80.
+        width (int, optional): A largura total da moldura. Default é 80.
         **kwargs: Informações adicionais exibidas abaixo do título, formatadas como 'CHAVE: VALOR'.
 
     Returns:
         None
 
-    Example:
-        >>> sy.header("Iniciando Simulação", width=60, autor="Victor", grid="1024x1024")
+    Exemplo de Aplicação:
+        >>> sy.header("Meu Código v2.1.0", width=80, autor="Victor", Prâmetro="25.02")
     """
 
     TL, TR = "╔", "╗"
     BL, BR = "╚", "╝"
     HL, VL = "═", "║"
     DIV_L, DIV_R = "╠", "╣"
-
     formatted_title = f" {title.upper()} "
     inner_space = width - 2
-
     print("\n" * 2)
     print(f"{GRAY}{TL}{HL * inner_space}{TR}{RESET}")
     print(
         f"{GRAY}{VL}{RESET}{BOLD}{GOLD}{formatted_title:^{inner_space}}{RESET}{GRAY}{VL}{RESET}"
     )
-
     if kwargs:
         print(f"{GRAY}{DIV_L}{HL * inner_space}{DIV_R}{RESET}")
         info_str = "  |  ".join([f"{k.upper()}: {v}" for k, v in kwargs.items()])
         print(
             f"{GRAY}{VL}{RESET}{CYAN}{info_str:^{inner_space}}{RESET}{GRAY}{VL}{RESET}"
         )
-
     print(f"{GRAY}{BL}{HL * inner_space}{BR}{RESET}")
     print("\n")
 
 
 def status(message):
     """
-    Exibe uma mensagem de status minimalista e formatada no terminal.
+    Exibe uma mensagem de status formatada no terminal.
 
     Args:
         message (str): O texto descritivo do status ou evento atual a ser exibido.
@@ -68,7 +65,7 @@ def status(message):
     Returns:
         None
 
-    Example:
+    Exemplo:
         >>> sy.status("Calculando distâncias cosmológicas...")
     """
 
@@ -77,7 +74,7 @@ def status(message):
 
 def param(*items, indent=6):
     """
-    Exibe múltiplos parâmetros com alinhamento vertical e contraste de cores.
+    Exibe múltiplos parâmetros com alinhamento vertical e indicaçãod e "Nome", "Valor", "Unidade".
 
     Args:
         *items (tuple): Sequências contendo (nome, valor, [unidade]).
@@ -86,35 +83,31 @@ def param(*items, indent=6):
     Returns:
         None
 
-    Example:
-        >>> sy.param(("Velocidade Inicial", 300, "km/s"), ("Densidade", 1e5, "cm^-3"))
+    Exemplo:
+        >>> sy.param(("Velocidade Inicial", 300, "km/s"), ("Densidade", 1e5, "cm^-3"), ...)
     """
     if not items:
         return
-
     processed = []
     for item in items:
         name = str(item[0])
         val = str(item[1])
         unit = str(item[2]) if len(item) > 2 else ""
         processed.append((name, val, unit))
-
     name_width = max(len(p[0]) for p in processed)
     val_width = max(len(p[1]) for p in processed)
     spacing = " " * indent
-
     for n, v, u in processed:
         name_fmt = f"{BOLD}{n.ljust(name_width)}{RESET}"
         separator = f"{GRAY}={RESET}"
         val_fmt = f"{CYAN}{v.rjust(val_width)}{RESET}"
         unit_fmt = f" {GRAY}[{u}]{RESET}" if u else ""
-
         print(f"{spacing}{name_fmt} {separator} {val_fmt}{unit_fmt}")
 
 
 def space(height=3):
     """
-    Insere um distanciamento vertical no output do terminal.
+    Insere um distanciamento vertical no terminal.
 
     Args:
         height (int, optional): O número de quebras de linha a serem impressas. Default é 3.
@@ -122,7 +115,7 @@ def space(height=3):
     Returns:
         None
 
-    Example:
+    Exemplo:
         >>> sy.space(height=2)
     """
     print("\n" * height)
@@ -130,7 +123,7 @@ def space(height=3):
 
 def table(*axes, mode="column", **kwargs):
     """
-    Formata e exibe dados em uma estrutura de tabela ASCII.
+    Formata e exibe dados de forma simplificada tanto para alinhamento de colunas ou linhas em uma estrutura de tabela ASCII.
 
     Args:
         *axes (tuple): Tuplas contendo os dados.
@@ -140,54 +133,44 @@ def table(*axes, mode="column", **kwargs):
     Returns:
         None
 
-    Example:
+    Exemplo:
         >>> sy.table(("ID", 1, 2), ("NOME", "Estrela A", "Estrela B"), mode="column")
     """
     inputs = list(axes) + list(kwargs.values())
-
     if not inputs:
         print("A lista está vazia.")
         return
-
     data = []
     if mode == "column":
         keys = [str(axis[0]) for axis in inputs]
         row_values = zip(*[axis[1:] for axis in inputs])
         for values in row_values:
             data.append(dict(zip(keys, values)))
-
     elif mode == "row":
         keys = [str(c) for c in inputs[0]]
         row_lines = inputs[1:]
         for values in row_lines:
             data.append(dict(zip(keys, values)))
-
     else:
         print(f"Tipo '{mode}' inválido. Use mode='column' ou mode='row'.")
         return
-
     if not data:
         print("A lista está vazia.")
         return
-
     columns = list(data[0].keys())
     widths = {}
-
     for col in columns:
         max_val_len = max([len(str(item[col])) for item in data])
         widths[col] = max(max_val_len, len(col))
-
     horizontal_separator = (
         "+" + "+".join(["-" * (widths[c] + 2) for c in columns]) + "+"
     )
-
     print(horizontal_separator)
     header_str = "|"
     for c in columns:
         header_str += f" {BOLD}{CYAN}{c.upper().center(widths[c])}{RESET} |"
     print(header_str)
     print(horizontal_separator)
-
     for item in data:
         line_str = "|"
         for c in columns:
@@ -197,13 +180,12 @@ def table(*axes, mode="column", **kwargs):
             else:
                 line_str += f" {val.ljust(widths[c])} |"
         print(line_str)
-
     print(horizontal_separator)
 
 
 def cin(message, expected_type="string"):
     """
-    Recebe e valida a entrada do usuário com um visual colorido no terminal.
+    Recebe e valida ("int", "float", "string") a entrada do usuário com um visual amigável no terminal.
 
     Args:
         message (str): A mensagem ou pergunta a ser exibida para o usuário.
@@ -212,20 +194,18 @@ def cin(message, expected_type="string"):
     Returns:
         any: O valor inserido pelo usuário convertido para o tipo especificado.
 
-    Example:
+    Exemplo:
         >>> limite_max = sy.cin("Insira o limite superior da integração", expected_type="float")
     """
 
     question_mark = f"{GOLD}{BOLD}?{RESET}"
     error_mark = f"{RED}{BOLD}!{RESET}"
     cursor = f"{CYAN}»{RESET}"
-
     while True:
         prompt = (
             f"\n  {question_mark} {message} {GRAY}[{expected_type}]{RESET} {cursor} "
         )
         user_input = input(prompt)
-
         try:
             if expected_type.lower() == "int":
                 return int(user_input)
@@ -255,7 +235,7 @@ def ok(messages, is_ok=True):
     Returns:
         None
 
-    Example:
+    Exemplo:
         >>> sy.ok("Matriz de densidade carregada")
         >>> sy.ok(["Arquivo corrompido", "Dados em branco"], is_ok=False)
     """
@@ -266,10 +246,8 @@ def ok(messages, is_ok=True):
         status_tag = f"{RED}[NOK]{RESET}"
 
     prefix = f"            {BLUE}{BOLD}»{RESET} {status_tag}  "
-
     if isinstance(messages, str):
         messages = [messages]
-
     for item in messages:
         print(f"{prefix} {item}")
 
@@ -284,7 +262,7 @@ def fim(message="EXECUÇÃO FINALIZADA!"):
     Returns:
         None
 
-    Example:
+    Exemplo:
         >>> sy.fim()
     """
     simb = "=" * 40
@@ -301,25 +279,20 @@ def help(filepath):
     Returns:
         None
 
-    Example:
+    Exemplo:
         >>> sy.help("data/instrucoes.txt")
     """
-
     if not os.path.exists(filepath):
         print(
             f"\n  {RED}{BOLD}!{RESET} {GRAY}Arquivo de ajuda '{filepath}' não encontrado.{RESET}"
         )
         return
-
     print()
-
     with open(filepath, "r", encoding="utf-8-sig") as file:
         for line in file:
             line = line.rstrip("\n")
-
             if not line:
                 continue
-
             if line.startswith("+"):
                 print(f"  {GRAY}{line}{RESET}")
             elif line.startswith("|"):
@@ -327,10 +300,18 @@ def help(filepath):
                 print(f"  {DIM}{formatted_line}{RESET}")
             else:
                 print(f"  {GRAY}{DIM}{line}{RESET}")
-
     print()
 
 
 def hidestatus(message, NSpaces=10):
+    """
+    Lê e exibe um arquivo de texto no terminal utilizando uma paleta de cores apagadas/secundárias.
+    Args:
+        filepath (str): Caminho para o arquivo de texto contendo a tabela ASCII.
+    Returns:
+        None
+    Exemplo:
+        >>> sy.help("data/instrucoes.txt")
+    """
     rec = " " * NSpaces
     print(f"{rec}{GRAY}{DIM}{message}{RESET}")
