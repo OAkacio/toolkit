@@ -22,8 +22,8 @@ def basic(
     y_data,
     title="",
     x_label="EIXO X",
-    y_label="EIXO Y",
     show_grid=False,
+    y_label="EIXO Y",
     show_box=True,
     color="black",
     linewidth=2.5,
@@ -136,6 +136,158 @@ def basic(
         plt.show()
     else:
         plt.close(fig)
+    return None
+
+
+def basicerror(
+    x_data,
+    y_data,
+    x_err=None,
+    y_err=None,
+    title="",
+    x_label="EIXO X",
+    show_grid=False,
+    y_label="EIXO Y",
+    show_box=True,
+    color="black",
+    linewidth=2.5,
+    title_fontsize=16,
+    axis_fontsize=12,
+    linestyle="-",
+    alpha=0.8,
+    grid_color="#E6E6E6",
+    fig_width=7,
+    fig_height=6,
+    remove_borders=False,
+    marker=None,
+    save_fig=False,
+    dpi=600,
+    file_format="pdf",
+    filename="basicerrorgraph",
+    show_plot=True,
+    ecolor=None,
+    elinewidth=1.5,
+    capsize=3.0,
+    capthick=1.5,
+):
+    """
+    Gera um gráfico 2D simples de uma única curva com barras de erro, com pré-definições de estilo focadas na formalidade científica. A função permite a personalização completa.
+
+    Args:
+        x_data (array-like): Dados do eixo X.
+        y_data (array-like): Dados do eixo Y.
+        x_err (array-like, optional): Valores de erro para o eixo X. Pode ser um valor escalar ou uma lista/array com o mesmo tamanho de x_data. Default é None.
+        y_err (array-like, optional): Valores de erro para o eixo Y. Pode ser um valor escalar ou uma lista/array com o mesmo tamanho de y_data. Default é None.
+        title (str, optional): Título principal do gráfico. Default é "".
+        x_label (str, optional): Rótulo do eixo X. Default é "EIXO X".
+        y_label (str, optional): Rótulo do eixo Y. Default é "EIXO Y".
+        show_grid (bool, optional): Ativa a grade no fundo do gráfico. Default é False.
+        show_box (bool, optional): Mantém a caixa ao redor do gráfico. Default é True.
+        color (str, optional): Cor da linha e dos marcadores. Default é "black".
+        linewidth (float, optional): Espessura da linha. Default é 2.5.
+        title_fontsize (int, optional): Tamanho da fonte do título. Default é 16.
+        axis_fontsize (int, optional): Tamanho da fonte dos eixos. Default é 12.
+        linestyle (str, optional): Estilo da linha (ex: '-', '--', ':'). Default é "-".
+        alpha (float, optional): Opacidade da linha e dos erros (0.0 a 1.0). Default é 0.8.
+        grid_color (str, optional): Cor da grade. Default é "#E6E6E6".
+        fig_width (float, optional): Largura da figura em polegadas. Default é 7.
+        fig_height (float, optional): Altura da figura em polegadas. Default é 6.
+        remove_borders (bool, optional): Remove as bordas superior e direita se show_box=True. Default é False.
+        marker (str, optional): Marcador dos pontos (ex: 'o', '*', 's'). Default é None.
+        save_fig (bool, optional): Se True, salva a figura no diretório 'figures/'. Default é False.
+        dpi (int, optional): Resolução da imagem salva. Default é 600.
+        file_format (str, optional): Formato do arquivo salvo ('pdf', 'png', 'svg'). Default é "pdf".
+        filename (str, optional): Nome do arquivo a ser salvo. Default é "basicerrorgraph".
+        show_plot (bool, optional): Exibe o gráfico na tela. Default é True.
+        ecolor (str, optional): Cor das barras de erro. Se None, utiliza a mesma cor da linha (parâmetro color). Default é None.
+        elinewidth (float, optional): Espessura das barras de erro. Default é 1.5.
+        capsize (float, optional): Tamanho dos traços perpendiculares (caps) nas extremidades das barras de erro. Default é 3.0.
+        capthick (float, optional): Espessura dos traços perpendiculares (caps). Default é 1.5.
+
+    Returns:
+        None
+
+    Example:
+        >>> import numpy as np
+        >>> x = np.linspace(0.1, 10, 15)
+        >>> y = np.log(x)
+        >>> x_errors = np.random.uniform(0.1, 0.3, size=len(x))
+        >>> y_errors = np.random.uniform(0.2, 0.5, size=len(y))
+        >>> basicerror(x, y, x_err=x_errors, y_err=y_errors, title="Logaritmo com Erros", marker="o", linestyle="--")
+    """
+    plt.rcParams.update(
+        {
+            "font.family": "serif",
+            "mathtext.fontset": "dejavuserif",
+            "axes.linewidth": 1.2,
+            "xtick.direction": "in",
+            "ytick.direction": "in",
+            "xtick.top": True,
+            "ytick.right": True,
+            "xtick.labelsize": axis_fontsize - 2,
+            "ytick.labelsize": axis_fontsize - 2,
+            "legend.frameon": False,
+        }
+    )
+
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=100)
+
+    ax.errorbar(
+        x_data,
+        y_data,
+        xerr=x_err,
+        yerr=y_err,
+        color=color,
+        linewidth=linewidth,
+        linestyle=linestyle,
+        alpha=alpha,
+        marker=marker,
+        label=title if title else None,
+        ecolor=ecolor if ecolor else color,
+        elinewidth=elinewidth,
+        capsize=capsize,
+        capthick=capthick,
+    )
+
+    if title:
+        ax.set_title(title, fontsize=title_fontsize, pad=15, fontweight="bold")
+
+    ax.set_xlabel(x_label, fontsize=axis_fontsize, labelpad=8)
+    ax.set_ylabel(y_label, fontsize=axis_fontsize, labelpad=8)
+    ax.set_xscale("linear")
+    ax.set_yscale("linear")
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
+    ax.yaxis.set_minor_locator(AutoMinorLocator())
+    ax.tick_params(which="major", length=6, width=1.2)
+    ax.tick_params(which="minor", length=3, width=1.0)
+
+    if show_grid:
+        ax.grid(True, linestyle="--", linewidth=0.5, color=grid_color, alpha=0.7)
+        ax.set_axisbelow(True)
+
+    if not show_box:
+        ax.set_frame_on(False)
+    elif remove_borders:
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+    else:
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_color("black")
+
+    plt.tight_layout()
+
+    if save_fig:
+        if not os.path.exists("figures"):
+            os.makedirs("figures")
+        filepath = f"figures/{filename}.{file_format}"
+        plt.savefig(filepath, dpi=dpi, bbox_inches="tight", facecolor="white")
+
+    if show_plot:
+        plt.show()
+    else:
+        plt.close(fig)
+
     return None
 
 
